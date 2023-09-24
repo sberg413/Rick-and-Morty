@@ -1,11 +1,14 @@
 package com.sberg413.rickandmorty.di
 
+import android.content.Context
 import com.sberg413.rickandmorty.BuildConfig
 import com.sberg413.rickandmorty.api.ApiService
+import com.sberg413.rickandmorty.db.CharacterDatabase
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -54,5 +57,10 @@ class AppModule {
     @Provides
     fun providesIoDispatcher(): CoroutineDispatcher {
         return Dispatchers.IO
+    }
+
+    @Provides
+    fun provideCharacterDatabase(@ApplicationContext context: Context): CharacterDatabase {
+        return CharacterDatabase.getInstance(context)
     }
 }

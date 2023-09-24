@@ -5,6 +5,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.sberg413.rickandmorty.api.ApiService
 import com.sberg413.rickandmorty.api.dto.CharacterListApi
+import com.sberg413.rickandmorty.models.Character
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -12,9 +13,9 @@ class CharacterPagingSource(
     private val apiService: ApiService,
     private val queryName: String?,
     private val queryStatus: String?
-) : PagingSource<Int, CharacterListApi.Result>() {
+) : PagingSource<Int, Character>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CharacterListApi.Result> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Character> {
         return try {
             // Start refresh at page 1 if undefined.
             val page = params.key ?: STARTING_PAGE_INDEX
@@ -37,7 +38,7 @@ class CharacterPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, CharacterListApi.Result>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Character>): Int? {
         // Try to find the page key of the closest page to anchorPosition, from
         // either the prevKey or the nextKey, but you need to handle nullability
         // here:

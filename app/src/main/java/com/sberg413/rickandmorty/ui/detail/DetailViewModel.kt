@@ -24,7 +24,7 @@ class DetailViewModel @Inject constructor(
     val locationData: StateFlow<Location?> = characterData.map { character ->
         if (character == null) return@map null
         Log.d(TAG, "character = $character")
-        val locationId = character.locationId // location?.url?.replace(Regex(".*/"), "") ?: ""
+        val locationId = character.location?.url?.replace(Regex(".*/"), "") ?: ""
         characterRepository.getLocation(locationId)
     }
         .flowOn(Dispatchers.IO)

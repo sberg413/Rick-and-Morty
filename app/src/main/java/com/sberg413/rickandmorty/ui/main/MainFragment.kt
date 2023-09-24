@@ -21,12 +21,14 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutManager
+import androidx.recyclerview.widget.RecyclerView.SCROLL_INDICATOR_TOP
 import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.adapters.CharacterAdapter
 import com.sberg413.rickandmorty.adapters.CharacterLoadStateAdapter
 import com.sberg413.rickandmorty.databinding.MainFragmentBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -50,18 +52,18 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // val layoutManager = LinearLayoutManager(requireContext())
-        val divider = DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
-
         val characterAdapter = CharacterAdapter { character ->
             mainViewModel.updateStateWithCharacterClicked(character)
         }
+        val divider = DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
+        val header = CharacterLoadStateAdapter { characterAdapter.retry() }
+        val footer = CharacterLoadStateAdapter { characterAdapter.retry() }
 
         binding?.apply {
 
-            recyclerMain.adapter = characterAdapter.withLoadStateHeaderAndFooter(
-                header = CharacterLoadStateAdapter { characterAdapter.retry() },
-                footer = CharacterLoadStateAdapter { characterAdapter.retry() }
+            recyclerMain.adapter = characterAdapter.withLoadStateFooter(
+               // header = header,
+                footer = footer
             )
             recyclerMain.addItemDecoration(divider)
             lifecycleOwner = viewLifecycleOwner
@@ -92,7 +94,7 @@ class MainFragment : Fragment() {
 
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    mainViewModel.listData.collect { pagingData ->
+                    mainViewModel.listData.collectLatest { pagingData ->
                         Log.d(TAG, "collectLatest = $pagingData")
                         characterAdapter.submitData( pagingData)
                         binding?.swiperefresh?.isRefreshing = false
@@ -113,17 +115,17 @@ class MainFragment : Fragment() {
             }
 
             lifecycleScope.launch {
-                characterAdapter.loadStateFlow.collect { loadState ->
+                characterAdapter.loadStateFlow.collectLatest { loadState ->
                     val isListEmpty = loadState.refresh is LoadState.NotLoading
                             && characterAdapter.itemCount == 0
                     // show empty list
                     emptyList.isVisible = isListEmpty
                     // Only show the list if refresh succeeds.
-                    recyclerMain.isVisible  = loadState.source.refresh is LoadState.NotLoading
+                    recyclerMain.isVisible  = loadState.source.refresh is LoadState.NotLoading || loadState.mediator?.refresh is LoadState.NotLoading
                     // Show loading spinner during initial load or refresh.
                     progressBar.isVisible = loadState.source.refresh is LoadState.Loading
                     // Show the retry state if initial load or refresh fails.
-                    retryButton.isVisible = loadState.source.refresh is LoadState.Error
+                    retryButton.isVisible = loadState.source.refresh is LoadState.Error && characterAdapter.itemCount == 0
 
                     // Toast on any error
                     val errorState = loadState.source.append as? LoadState.Error
@@ -137,6 +139,13 @@ class MainFragment : Fragment() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+
+//                    // Show a retry header if there was an error refreshing, and items were previously
+//                    // cached OR default to the default prepend state
+//                    header.loadState = loadState.mediator
+//                        ?.refresh
+//                        ?.takeIf { it is LoadState.Error && characterAdapter.itemCount > 0 }
+//                        ?: loadState.prepend
                 }
             }
         }
