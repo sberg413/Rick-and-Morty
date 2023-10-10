@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "remote_keys")
-data class RemoteKeys(
+data class RemoteKey(
     @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "character_id")
     val characterId: Int,

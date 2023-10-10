@@ -45,8 +45,7 @@ class CharacterRepositoryImpl @Inject constructor(
                 characterDatabase
             ),
             pagingSourceFactory = dbPagingSourceFactory // { CharacterPagingSource(apiService, search, status) }
-        )
-            .flow
+        ).flow
 //            .map { pagingData ->
 //               pagingData.map {
 //                   val originId = regex.replace(it.origin.url,"")

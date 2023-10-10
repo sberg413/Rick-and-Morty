@@ -56,25 +56,25 @@ class MainFragment : Fragment() {
             mainViewModel.updateStateWithCharacterClicked(character)
         }
         val divider = DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
-        val header = CharacterLoadStateAdapter { characterAdapter.retry() }
+        // val header = CharacterLoadStateAdapter { characterAdapter.retry() }
         val footer = CharacterLoadStateAdapter { characterAdapter.retry() }
 
         binding?.apply {
+            lifecycleOwner = viewLifecycleOwner
 
             recyclerMain.adapter = characterAdapter.withLoadStateFooter(
                // header = header,
                 footer = footer
             )
             recyclerMain.addItemDecoration(divider)
-            lifecycleOwner = viewLifecycleOwner
             swiperefresh.setOnRefreshListener {
                 characterAdapter.refresh()
             }
 
             searchBar.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_GO) {
-                    recyclerMain.scrollToPosition(0)
                     mainViewModel.setSearchFilter(searchBar.text.trim().toString())
+                    recyclerMain.post {  recyclerMain.scrollToPosition(0) }
                     true
                 } else {
                     false
@@ -82,8 +82,8 @@ class MainFragment : Fragment() {
             }
             searchBar.setOnKeyListener { _, keyCode, event ->
                 if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                    recyclerMain.scrollToPosition(0)
                     mainViewModel.setSearchFilter(searchBar.text.trim().toString())
+                    recyclerMain.post {  recyclerMain.scrollToPosition(0) }
                     true
                 } else {
                     false
@@ -156,6 +156,9 @@ class MainFragment : Fragment() {
             val filterVal = parent.adapter.getItem(position) as String
             Log.d(TAG," Selected: $filterVal")
             mainViewModel.setSatusFilter(filterVal)
+            binding?.recyclerMain?.let {
+                it.post { it.scrollToPosition(0)  }
+            }
         }
 
         override fun onNothingSelected(parent: AdapterView<*>?) {}

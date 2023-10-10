@@ -9,7 +9,7 @@ import com.sberg413.rickandmorty.models.Character
 import java.util.concurrent.Executors
 
 @Database(
-    entities = [Character::class, RemoteKeys::class],
+    entities = [Character::class, RemoteKey::class],
     version = 1,
     exportSchema = false
 )
