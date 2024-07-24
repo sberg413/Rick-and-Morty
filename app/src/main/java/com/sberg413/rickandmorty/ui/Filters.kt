@@ -1,4 +1,4 @@
-package com.sberg413.rickandmorty.models
+package com.sberg413.rickandmorty.ui
 
 
 @JvmInline

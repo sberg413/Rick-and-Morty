@@ -1,12 +1,10 @@
-package com.sberg413.rickandmorty.api
+package com.sberg413.rickandmorty.data.api
 
-import com.sberg413.rickandmorty.api.dto.CharacterListApi
-import com.sberg413.rickandmorty.models.Location
+import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface ApiService {
+interface CharacterService {
 
     @GET("character")
     suspend fun getCharacterList(
@@ -17,8 +15,4 @@ interface ApiService {
 
 //    @GET("character/{id}")
 //    fun getCharacterDetail(@Path("id")  id: Int): Call<Character>
-
-    @GET("location/{id}")
-    suspend fun getLocation(@Path("id") id: String): Location
-
 }

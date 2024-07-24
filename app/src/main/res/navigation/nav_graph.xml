@@ -22,6 +22,6 @@
         android:name="com.sberg413.rickandmorty.ui.detail.DetailFragment" >
         <argument
             android:name="character"
-            app:argType="com.sberg413.rickandmorty.models.Character" />
+            app:argType="com.sberg413.rickandmorty.data.model.Character" />
     </fragment>
 </navigation>

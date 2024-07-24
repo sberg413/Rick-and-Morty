@@ -31,8 +31,8 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.sberg413.rickandmorty.R
-import com.sberg413.rickandmorty.models.Character
-import com.sberg413.rickandmorty.models.Location
+import com.sberg413.rickandmorty.data.model.Character
+import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.ui.LoadingScreen
 import com.sberg413.rickandmorty.utils.findActivity
 

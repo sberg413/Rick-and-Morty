@@ -1,7 +1,9 @@
 package com.sberg413.rickandmorty.di
 
-import com.sberg413.rickandmorty.repository.CharacterRepository
-import com.sberg413.rickandmorty.repository.TestCharacterRepositoryImpl
+import com.sberg413.rickandmorty.data.repository.CharacterRepository
+import com.sberg413.rickandmorty.data.repository.LocationRepository
+import com.sberg413.rickandmorty.data.repository.TestCharacterRepositoryImpl
+import com.sberg413.rickandmorty.data.repository.TestLocationRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.components.SingletonComponent
@@ -20,5 +22,10 @@ abstract class TestRepositoryModule
     abstract fun bindCharacterRepository(
         characterRepositoryImpl: TestCharacterRepositoryImpl
     ): CharacterRepository
+
+    @Binds
+    abstract fun bindLocationRepository(
+        locationRepositoryImpl: TestLocationRepositoryImpl
+    ): LocationRepository
 
 }

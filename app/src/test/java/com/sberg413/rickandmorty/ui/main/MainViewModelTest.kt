@@ -5,17 +5,16 @@ import app.cash.turbine.test
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData
 import com.sberg413.rickandmorty.TestData.TEST_CHARACTER
-import com.sberg413.rickandmorty.models.Character
-import com.sberg413.rickandmorty.models.CharacterFilter
-import com.sberg413.rickandmorty.models.NoSearchFilter
-import com.sberg413.rickandmorty.models.NoStatusFilter
-import com.sberg413.rickandmorty.models.SearchFilter
-import com.sberg413.rickandmorty.models.StatusFilter
-import com.sberg413.rickandmorty.repository.CharacterRepository
+import com.sberg413.rickandmorty.data.model.Character
+import com.sberg413.rickandmorty.data.repository.CharacterRepository
+import com.sberg413.rickandmorty.ui.CharacterFilter
+import com.sberg413.rickandmorty.ui.NoSearchFilter
+import com.sberg413.rickandmorty.ui.NoStatusFilter
+import com.sberg413.rickandmorty.ui.SearchFilter
+import com.sberg413.rickandmorty.ui.StatusFilter
 import com.sberg413.rickandmorty.util.collectDataForTest
 import junit.framework.TestCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -54,7 +53,7 @@ class MainViewModelTest : TestCase() {
     lateinit var viewModel: MainViewModel
 
     @Before
-    fun before() {
+    fun before() = runTest {
         MockitoAnnotations.openMocks(this)
 
         val dataResponse = flow { emit(pagingData) }

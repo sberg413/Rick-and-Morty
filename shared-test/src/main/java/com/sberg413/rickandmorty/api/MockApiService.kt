@@ -1,10 +1,13 @@
 package com.sberg413.rickandmorty.api
 
-import com.sberg413.rickandmorty.api.dto.CharacterListApi
-import com.sberg413.rickandmorty.models.Location
+import com.sberg413.rickandmorty.data.api.CharacterService
+import com.sberg413.rickandmorty.data.api.LocationService
+import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
+import com.sberg413.rickandmorty.data.model.Location
+import retrofit2.Response
 import kotlin.math.ceil
 
-class MockApiService : ApiService {
+class MockApiService : CharacterService, LocationService {
 
     companion object {
         private const val ITEMS_PER_PAGE = 2
@@ -54,7 +57,7 @@ class MockApiService : ApiService {
         return CharacterListApi(info, subList)
     }
 
-    override suspend fun getLocation(id: String): Location {
+    override suspend fun getLocation(id: String): Response<Location> {
         TODO("Not yet implemented")
     }
 

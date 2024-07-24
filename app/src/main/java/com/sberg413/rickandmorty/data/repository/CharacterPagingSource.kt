@@ -1,15 +1,15 @@
-package com.sberg413.rickandmorty.repository
+package com.sberg413.rickandmorty.data.repository
 
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.sberg413.rickandmorty.api.ApiService
-import com.sberg413.rickandmorty.api.dto.CharacterListApi
+import com.sberg413.rickandmorty.data.api.CharacterService
+import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
 import retrofit2.HttpException
 import java.io.IOException
 
 class CharacterPagingSource(
-    private val apiService: ApiService,
+    private val apiService: CharacterService,
     private val queryName: String?,
     private val queryStatus: String?
 ) : PagingSource<Int, CharacterListApi.Result>() {
