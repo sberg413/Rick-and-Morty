@@ -5,6 +5,7 @@ import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData.readJsonFile
 import com.sberg413.rickandmorty.data.api.CharacterService
 import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
+import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -28,12 +29,13 @@ class CharacterRepositoryImplTest {
     val coroutineRule = MainCoroutineRule(testDispatcher)
 
     private val mockApiServices: CharacterService = mock()
+    private val mockRemoteDataSource: CharacterRemoteDataSource = mock()
 
-    lateinit var characterRepositoryImpl: CharacterRepositoryImpl
+    private lateinit var characterRepositoryImpl: CharacterRepositoryImpl
 
     @Before
     fun setUp() {
-        characterRepositoryImpl = CharacterRepositoryImpl(mockApiServices, testDispatcher)
+        characterRepositoryImpl = CharacterRepositoryImpl(mockApiServices, mockRemoteDataSource, testDispatcher)
     }
 
     @After

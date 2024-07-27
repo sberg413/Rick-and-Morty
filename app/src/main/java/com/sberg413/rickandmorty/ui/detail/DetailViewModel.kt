@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.sberg413.rickandmorty.data.api.ApiResult
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.model.Location
-import com.sberg413.rickandmorty.data.repository.LocationRepository
+import com.sberg413.rickandmorty.domain.GetCharacterDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +23,7 @@ sealed class CharacterDetailUiState {
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val locationRepository: LocationRepository,
+    private val characterAndLocationUseCase: GetCharacterDetailUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -32,44 +32,36 @@ class DetailViewModel @Inject constructor(
 
     companion object {
         private const val TAG = "DetailViewModel"
-        const val KEY_CHARACTER = "character"
+        const val KEY_CHARACTER_ID = "character"
     }
 
     init {
         viewModelScope.launch {
-            savedStateHandle.get<Character>(KEY_CHARACTER)?.let { character ->
+            savedStateHandle.get<Int>(KEY_CHARACTER_ID)?.let { id ->
                 // _uiState.value = _uiState.value.copy(character = character)
-                getLocationFromCharacter(character)
+                getCharacterDetailFromCharacterId(id)
             }
         }
     }
 
-    private suspend fun getLocationFromCharacter(character: Character) {
-        Log.d(TAG, "character = $character")
-        val locationId = character.locationId?.takeIf { it.isNotEmpty() }
-        if (locationId == null) {
-            _uiState.value = CharacterDetailUiState.Success(
-                character = character,
-                location = null
-            )
-        } else {
-            when (val result = locationRepository.getLocation(locationId)) {
-                is ApiResult.Success -> {
-                    _uiState.value = CharacterDetailUiState.Success(
-                        character = character,
-                        location = result.data
-                    )
-                }
+    private suspend fun getCharacterDetailFromCharacterId(characterId: Int) {
+        Log.d(TAG, "character = $characterId")
 
-                is ApiResult.Error -> {
-                    _uiState.value = CharacterDetailUiState.Error(result.message)
-                }
+        when (val result = characterAndLocationUseCase.invoke(characterId)) {
+            is ApiResult.Success -> {
+                _uiState.value = CharacterDetailUiState.Success(
+                    character = result.data.character,
+                    location = result.data.location
+                )
+            }
 
-                is ApiResult.Exception -> {
+            is ApiResult.Error -> {
+                _uiState.value = CharacterDetailUiState.Error(result.message)
+            }
 
-                }
+            is ApiResult.Exception -> {
+                _uiState.value = CharacterDetailUiState.Error(result.e.message ?: "An unknown error has occurred.")
             }
         }
-
     }
 }
