@@ -1,5 +1,8 @@
-package com.sberg413.rickandmorty.models
+package com.sberg413.rickandmorty.data.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class Location(
     val id: Int,
     val name: String,

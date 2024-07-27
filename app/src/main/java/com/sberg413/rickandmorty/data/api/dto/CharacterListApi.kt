@@ -1,4 +1,4 @@
-package com.sberg413.rickandmorty.api.dto
+package com.sberg413.rickandmorty.data.api.dto
 
 data class CharacterListApi(
     val info: Info,

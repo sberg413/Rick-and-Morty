@@ -31,4 +31,5 @@ dependencies {
     implementation(libs.androidx.test.rules)
     implementation(libs.material)
     implementation(libs.junit)
+    implementation(libs.retrofit)
 }

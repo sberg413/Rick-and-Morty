@@ -4,8 +4,9 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.models.Character
-import com.sberg413.rickandmorty.repository.CharacterRepository
+import com.sberg413.rickandmorty.data.api.ApiResult
+import com.sberg413.rickandmorty.data.model.Character
+import com.sberg413.rickandmorty.data.repository.LocationRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -35,7 +36,7 @@ class DetailViewModelTest {
     val instantExecutorRule = InstantTaskExecutorRule()
 
     @Mock
-    private var characterRepository: CharacterRepository = mock()
+    private var locationRepository: LocationRepository = mock()
 
 
     private lateinit var savedStateHandle: SavedStateHandle
@@ -52,11 +53,12 @@ class DetailViewModelTest {
     @Test
     fun testLoadingState() = runTest {
         // Given
-        `when`(characterRepository.getLocation(anyString())).thenAnswer(
-            AnswersWithDelay(1000, Returns(TestData.TEST_LOCATION)))
+        `when`(locationRepository.getLocation(anyString())).thenAnswer(
+            AnswersWithDelay(1000,
+                Returns(ApiResult.Success(TestData.TEST_LOCATION))))
 
         // When
-        viewModel = DetailViewModel(characterRepository, savedStateHandle)
+        viewModel = DetailViewModel(locationRepository, savedStateHandle)
 
         // Then
         assertEquals(CharacterDetailUiState.Loading, viewModel.uiState.first())
@@ -67,10 +69,11 @@ class DetailViewModelTest {
         // Given
         val location = TestData.TEST_LOCATION
         val character = savedStateHandle.get<Character>(DetailViewModel.KEY_CHARACTER)!!
-        `when`(characterRepository.getLocation(character.locationId!!)).thenReturn(location)
+        `when`(locationRepository.getLocation(character.locationId!!))
+            .thenReturn(ApiResult.Success(location))
 
         // When
-        viewModel = DetailViewModel(characterRepository, savedStateHandle)
+        viewModel = DetailViewModel(locationRepository, savedStateHandle)
         advanceUntilIdle() // Wait for all coroutines to finish
 
         // Then

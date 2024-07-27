@@ -1,9 +1,7 @@
 package com.sberg413.rickandmorty
 
-import com.sberg413.rickandmorty.models.Character
-import com.sberg413.rickandmorty.models.Location
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import com.sberg413.rickandmorty.data.model.Character
+import com.sberg413.rickandmorty.data.model.Location
 
 object TestData {
 

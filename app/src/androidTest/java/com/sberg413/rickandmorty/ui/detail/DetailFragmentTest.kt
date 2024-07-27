@@ -9,9 +9,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sberg413.rickandmorty.TestData.TEST_CHARACTER
 import com.sberg413.rickandmorty.TestData.TEST_LOCATION
+import com.sberg413.rickandmorty.data.repository.LocationRepository
+import com.sberg413.rickandmorty.data.repository.TestLocationRepositoryImpl
 import com.sberg413.rickandmorty.launchFragmentInHiltContainer
-import com.sberg413.rickandmorty.repository.CharacterRepository
-import com.sberg413.rickandmorty.repository.TestCharacterRepositoryImpl
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import junit.framework.TestCase
@@ -35,7 +35,7 @@ class DetailFragmentTest : TestCase() {
     val composeTestRule = createComposeRule()
 
     @Inject
-    lateinit var repository: CharacterRepository
+    lateinit var repository: LocationRepository
 
     @Before
     public override fun setUp() {
@@ -48,7 +48,7 @@ class DetailFragmentTest : TestCase() {
 
     @Test
     fun testDetailDisplayed() = runTest {
-        (repository as TestCharacterRepositoryImpl).location = TEST_LOCATION
+        (repository as TestLocationRepositoryImpl).location = TEST_LOCATION
 
         val fragmentArgs = Bundle().apply {
             putParcelable(DetailViewModel.KEY_CHARACTER, TEST_CHARACTER)

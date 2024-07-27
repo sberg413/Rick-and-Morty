@@ -1,9 +1,11 @@
-package com.sberg413.rickandmorty.models
+package com.sberg413.rickandmorty.data.model
 
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
+@Immutable
 data class Character(
     val id: Int,
     val status: String,

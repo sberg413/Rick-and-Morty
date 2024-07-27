@@ -1,6 +1,7 @@
 package com.sberg413.rickandmorty.di
 
-import com.sberg413.rickandmorty.api.ApiService
+import com.sberg413.rickandmorty.data.api.CharacterService
+import com.sberg413.rickandmorty.data.api.LocationService
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -51,7 +52,13 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideApiService(retrofit: Retrofit): ApiService = retrofit.create(ApiService::class.java)
+    fun provideCharacterService(retrofit: Retrofit): CharacterService =
+        retrofit.create(CharacterService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideLocationService(retrofit: Retrofit): LocationService =
+        retrofit.create(LocationService::class.java)
 
     @Provides
     fun providesIoDispatcher(): CoroutineDispatcher {

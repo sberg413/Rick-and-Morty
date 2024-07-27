@@ -1,6 +1,6 @@
 package com.sberg413.rickandmorty.util
 
-import com.sberg413.rickandmorty.api.dto.CharacterListApi
+import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
 
 class CharacterFactory {
 

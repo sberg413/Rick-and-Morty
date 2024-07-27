@@ -3,9 +3,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kapt)
-    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.navigation.safeargs)
     jacoco
 }
@@ -146,11 +146,15 @@ kapt {
     correctErrorTypes = true
 }
 
+hilt {
+    // added to prevent build warning
+    enableAggregatingTask = true
+}
+
 jacoco {
     toolVersion = "0.8.8"
     // reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
 }
-
 
 tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn("testDebugUnitTest")

@@ -1,5 +1,6 @@
 package com.sberg413.rickandmorty.ui.main
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.sberg413.rickandmorty.R
-import com.sberg413.rickandmorty.models.Character
+import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
 
 
@@ -43,6 +44,10 @@ fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modif
     val (textState, setTextState) = rememberSaveable { mutableStateOf("") }
     val onSearch: (String) -> Unit = {
         viewModel.setSearchFilter(it)
+    }
+    val onItemClicked: (Character) -> Unit = {
+        Log.d("MainCharacterListScreen", "Character clicked: $it")
+        viewModel.updateStateWithCharacterClicked(it)
     }
 
     Column(modifier) {
@@ -69,10 +74,9 @@ fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modif
                             characters[index]?.let { item ->
                                 CharacterListItem(
                                     character = item,
-                                    modifier = Modifier
-                                ) {
-                                    viewModel.updateStateWithCharacterClicked(item)
-                                }
+                                    modifier = Modifier,
+                                    clickListener = onItemClicked
+                                )
                             }
                         }
                     }
@@ -86,12 +90,12 @@ fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modif
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun CharacterListItem(character: Character, modifier: Modifier = Modifier, clickListener: () -> Unit) {
+fun CharacterListItem(character: Character, modifier: Modifier = Modifier, clickListener: (Character) -> Unit) {
 
     Row(
         modifier
             .fillMaxWidth()
-            .clickable { clickListener() }
+            .clickable { clickListener(character) }
             .padding(16.dp)
     ) {
 

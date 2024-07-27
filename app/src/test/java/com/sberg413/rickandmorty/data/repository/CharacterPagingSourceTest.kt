@@ -1,8 +1,8 @@
-package com.sberg413.rickandmorty.repository
+package com.sberg413.rickandmorty.data.repository
 
 import androidx.paging.PagingSource
-import com.sberg413.rickandmorty.util.CharacterFactory
 import com.sberg413.rickandmorty.api.MockApiService
+import com.sberg413.rickandmorty.util.CharacterFactory
 import junit.framework.TestCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

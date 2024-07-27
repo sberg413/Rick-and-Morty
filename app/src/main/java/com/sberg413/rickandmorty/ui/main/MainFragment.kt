@@ -12,9 +12,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 
@@ -40,16 +44,25 @@ class MainFragment : Fragment() {
         }
     }
 
+    @OptIn(FlowPreview::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requireActivity().addMenuProvider( StatusMenuProvider(mainViewModel), viewLifecycleOwner, Lifecycle.State.RESUMED)
-        lifecycleScope.launch {
-            mainViewModel.characterClicked.collectLatest {
-                Log.d(TAG, "characterClicked: $it")
-                if (it != null) {
-                    val action = MainFragmentDirections.actionShowDetailFragment(it)
-                    findNavController().navigate(action)
-                    mainViewModel.updateStateWithCharacterClicked(null)
+        Log.d(TAG, "onViewCreated")
+        requireActivity().addMenuProvider(
+            StatusMenuProvider(mainViewModel),
+            viewLifecycleOwner,
+            Lifecycle.State.STARTED
+        )
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.characterClicked
+                    .filterNotNull()
+                    .collect {
+                        val action = MainFragmentDirections.actionShowDetailFragment(it)
+                        Log.d(TAG, "characterClicked: $it | action: $action")
+                        findNavController().navigate(action)
+                        mainViewModel.updateStateWithCharacterClicked(null)
                 }
             }
         }

@@ -15,14 +15,13 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" >
-        </action>
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/detailFragment"
         android:name="com.sberg413.rickandmorty.ui.detail.DetailFragment" >
         <argument
             android:name="character"
-            app:argType="com.sberg413.rickandmorty.models.Character" />
+            app:argType="com.sberg413.rickandmorty.data.model.Character" />
     </fragment>
 </navigation>
