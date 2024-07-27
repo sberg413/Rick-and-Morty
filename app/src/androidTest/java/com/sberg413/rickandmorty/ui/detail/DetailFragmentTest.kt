@@ -51,7 +51,7 @@ class DetailFragmentTest : TestCase() {
         (repository as TestLocationRepositoryImpl).location = TEST_LOCATION
 
         val fragmentArgs = Bundle().apply {
-            putParcelable(DetailViewModel.KEY_CHARACTER, TEST_CHARACTER)
+            putParcelable(DetailViewModel.KEY_CHARACTER_ID, TEST_CHARACTER)
         }
 
         launchFragmentInHiltContainer<DetailFragment>(fragmentArgs) {

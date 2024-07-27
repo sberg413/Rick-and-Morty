@@ -6,7 +6,9 @@ import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData
 import com.sberg413.rickandmorty.data.api.ApiResult
 import com.sberg413.rickandmorty.data.model.Character
+import com.sberg413.rickandmorty.data.model.CharacterDetail
 import com.sberg413.rickandmorty.data.repository.LocationRepository
+import com.sberg413.rickandmorty.domain.GetCharacterDetailUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -16,6 +18,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.mock
@@ -36,29 +39,32 @@ class DetailViewModelTest {
     val instantExecutorRule = InstantTaskExecutorRule()
 
     @Mock
-    private var locationRepository: LocationRepository = mock()
+    private var characterDetailUseCase: GetCharacterDetailUseCase = mock()
 
 
+    private val characterDetail = CharacterDetail(TestData.TEST_CHARACTER, TestData.TEST_LOCATION)
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var viewModel: DetailViewModel
+
+
 
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
 
         val character = TestData.TEST_CHARACTER
-        savedStateHandle = SavedStateHandle(mapOf(DetailViewModel.KEY_CHARACTER to character))
+        savedStateHandle = SavedStateHandle(mapOf(DetailViewModel.KEY_CHARACTER_ID to character.id))
     }
 
     @Test
     fun testLoadingState() = runTest {
         // Given
-        `when`(locationRepository.getLocation(anyString())).thenAnswer(
+        `when`(characterDetailUseCase.invoke(anyInt())).thenAnswer(
             AnswersWithDelay(1000,
-                Returns(ApiResult.Success(TestData.TEST_LOCATION))))
+                Returns(ApiResult.Success(characterDetail))))
 
         // When
-        viewModel = DetailViewModel(locationRepository, savedStateHandle)
+        viewModel = DetailViewModel(characterDetailUseCase, savedStateHandle)
 
         // Then
         assertEquals(CharacterDetailUiState.Loading, viewModel.uiState.first())
@@ -67,16 +73,18 @@ class DetailViewModelTest {
     @Test
     fun testSuccessState() = runTest {
         // Given
-        val location = TestData.TEST_LOCATION
-        val character = savedStateHandle.get<Character>(DetailViewModel.KEY_CHARACTER)!!
-        `when`(locationRepository.getLocation(character.locationId!!))
-            .thenReturn(ApiResult.Success(location))
+        val id = savedStateHandle.get<Int>(DetailViewModel.KEY_CHARACTER_ID)!!
+        `when`(characterDetailUseCase.invoke(id))
+            .thenReturn(ApiResult.Success(characterDetail))
 
         // When
-        viewModel = DetailViewModel(locationRepository, savedStateHandle)
+        viewModel = DetailViewModel(characterDetailUseCase, savedStateHandle)
         advanceUntilIdle() // Wait for all coroutines to finish
 
         // Then
-        assertEquals(CharacterDetailUiState.Success(character, location), viewModel.uiState.first())
+        assertEquals(
+            CharacterDetailUiState.Success(characterDetail.character, characterDetail.location),
+            viewModel.uiState.first()
+        )
     }
 }

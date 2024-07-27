@@ -2,6 +2,7 @@ package com.sberg413.rickandmorty.api
 
 import com.sberg413.rickandmorty.data.api.CharacterService
 import com.sberg413.rickandmorty.data.api.LocationService
+import com.sberg413.rickandmorty.data.api.dto.CharacterDTO
 import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
 import com.sberg413.rickandmorty.data.model.Location
 import retrofit2.Response
@@ -13,7 +14,7 @@ class MockApiService : CharacterService, LocationService {
         private const val ITEMS_PER_PAGE = 2
     }
 
-    private val characters = mutableListOf<CharacterListApi.Result>()
+    private val characters = mutableListOf<CharacterDTO>()
 
 //     private val info = CharacterListApi.Info(1,
 //                    "https://rickandmortyapi.com/api/character?page=2",
@@ -57,11 +58,15 @@ class MockApiService : CharacterService, LocationService {
         return CharacterListApi(info, subList)
     }
 
+    override suspend fun getCharacter(id: Int): Response<CharacterDTO> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getLocation(id: String): Response<Location> {
         TODO("Not yet implemented")
     }
 
-    fun addCharacterResult(result: CharacterListApi.Result) {
+    fun addCharacterResult(result: CharacterDTO) {
         characters.add(result)
     }
 }

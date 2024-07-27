@@ -2,7 +2,7 @@ package com.sberg413.rickandmorty.data.api.dto
 
 data class CharacterListApi(
     val info: Info,
-    val results: List<Result>
+    val results: List<CharacterDTO>
 ) {
     data class Info(
         val count: Int,
@@ -10,30 +10,4 @@ data class CharacterListApi(
         val pages: Int,
         val prev: String?
     )
-
-    data class Result(
-        val created: String,
-        val episode: List<String>,
-        val gender: String,
-        val id: Int,
-        val image: String,
-        val location: Location,
-        val name: String,
-        val origin: Origin,
-        val species: String,
-        val status: String,
-        val type: String,
-        val url: String
-    ) {
-        data class Origin(
-            val name: String,
-            val url: String
-        )
-
-        data class Location(
-            val name: String,
-            val url: String
-        )
-
-    }
 }

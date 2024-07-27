@@ -1,22 +1,23 @@
 package com.sberg413.rickandmorty.util
 
+import com.sberg413.rickandmorty.data.api.dto.CharacterDTO
 import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
 
 class CharacterFactory {
 
     private var id = 0
 
-    fun createMockCharacter(name: String) : CharacterListApi.Result {
+    fun createMockCharacter(name: String) : CharacterDTO {
         id++
-        return CharacterListApi.Result(
+        return CharacterDTO(
             "1/1/2020",
             listOf("http://episodes.com/1", "http://episodes.com/2"),
             "male",
             id,
             "http://imageurl.com",
-           CharacterListApi.Result.Location("someplace","http://someurl.com/"),
+           CharacterDTO.Location("someplace","http://someurl.com/"),
             "1",
-            CharacterListApi.Result.Origin("someplace","http://someurl.com/"),
+            CharacterDTO.Origin("someplace","http://someurl.com/"),
             "human",
             name,
             "",

@@ -59,7 +59,7 @@ class MainFragment : Fragment() {
                 mainViewModel.characterClicked
                     .filterNotNull()
                     .collect {
-                        val action = MainFragmentDirections.actionShowDetailFragment(it)
+                        val action = MainFragmentDirections.actionShowDetailFragment(it.id)
                         Log.d(TAG, "characterClicked: $it | action: $action")
                         findNavController().navigate(action)
                         mainViewModel.updateStateWithCharacterClicked(null)
