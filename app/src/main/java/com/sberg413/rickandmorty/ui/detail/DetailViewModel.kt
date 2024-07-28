@@ -23,45 +23,37 @@ sealed class CharacterDetailUiState {
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val characterAndLocationUseCase: GetCharacterDetailUseCase,
+    private val getCharacterDetailUseCase: GetCharacterDetailUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private var _uiState: MutableStateFlow<CharacterDetailUiState> = MutableStateFlow(CharacterDetailUiState.Loading)
+    private val characterId: Int = savedStateHandle.get<Int>(KEY_CHARACTER_ID) ?: -1
+
+    private val _uiState = MutableStateFlow<CharacterDetailUiState>(CharacterDetailUiState.Loading)
     val uiState: StateFlow<CharacterDetailUiState> = _uiState.asStateFlow()
+
+    init {
+        refresh()
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _uiState.value = CharacterDetailUiState.Loading
+            val result = getCharacterDetailUseCase.invoke(characterId)
+            Log.d(TAG, "GetCharacterDetailUseCase result = $result")
+            _uiState.value = when (result) {
+                is ApiResult.Success -> CharacterDetailUiState.Success(
+                    character = result.data.character,
+                    location = result.data.location
+                )
+                is ApiResult.Error -> CharacterDetailUiState.Error(result.message)
+                is ApiResult.Exception -> CharacterDetailUiState.Error(result.e.message ?: "An unknown error has occurred.")
+            }
+        }
+    }
 
     companion object {
         private const val TAG = "DetailViewModel"
         const val KEY_CHARACTER_ID = "character"
-    }
-
-    init {
-        viewModelScope.launch {
-            savedStateHandle.get<Int>(KEY_CHARACTER_ID)?.let { id ->
-                // _uiState.value = _uiState.value.copy(character = character)
-                getCharacterDetailFromCharacterId(id)
-            }
-        }
-    }
-
-    private suspend fun getCharacterDetailFromCharacterId(characterId: Int) {
-        Log.d(TAG, "character = $characterId")
-
-        when (val result = characterAndLocationUseCase.invoke(characterId)) {
-            is ApiResult.Success -> {
-                _uiState.value = CharacterDetailUiState.Success(
-                    character = result.data.character,
-                    location = result.data.location
-                )
-            }
-
-            is ApiResult.Error -> {
-                _uiState.value = CharacterDetailUiState.Error(result.message)
-            }
-
-            is ApiResult.Exception -> {
-                _uiState.value = CharacterDetailUiState.Error(result.e.message ?: "An unknown error has occurred.")
-            }
-        }
     }
 }
