@@ -8,13 +8,14 @@ import com.sberg413.rickandmorty.data.model.Location
 import retrofit2.Response
 import kotlin.math.ceil
 
-class MockApiService : CharacterService, LocationService {
+class FakeApiService : CharacterService, LocationService {
 
     companion object {
         private const val ITEMS_PER_PAGE = 2
     }
 
-    private val characters = mutableListOf<CharacterDTO>()
+    var characters: List<CharacterDTO> = emptyList()
+    var exception: Exception? = null
 
 //     private val info = CharacterListApi.Info(1,
 //                    "https://rickandmortyapi.com/api/character?page=2",
@@ -28,6 +29,8 @@ class MockApiService : CharacterService, LocationService {
         status: String?
     ): CharacterListApi {
 
+        // if an exception is set, throw it
+        if (exception != null) throw exception!!
 
         val offsetStart = (page - 1) * ITEMS_PER_PAGE
         val offsetEnd = page * ITEMS_PER_PAGE
@@ -66,7 +69,4 @@ class MockApiService : CharacterService, LocationService {
         TODO("Not yet implemented")
     }
 
-    fun addCharacterResult(result: CharacterDTO) {
-        characters.add(result)
-    }
 }
