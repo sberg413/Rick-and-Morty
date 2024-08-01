@@ -1,4 +1,4 @@
-package com.sberg413.rickandmorty.domain
+package com.sberg413.rickandmorty.domain.usecase
 
 import com.sberg413.rickandmorty.TestData
 import com.sberg413.rickandmorty.data.api.ApiResult

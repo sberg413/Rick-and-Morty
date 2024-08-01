@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.sberg413.rickandmorty.data.api.ApiResult
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.model.Location
-import com.sberg413.rickandmorty.domain.GetCharacterDetailUseCase
+import com.sberg413.rickandmorty.domain.usecase.GetCharacterDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
