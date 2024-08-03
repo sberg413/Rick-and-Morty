@@ -1,6 +1,6 @@
 package com.sberg413.rickandmorty.domain.usecase
 
-import com.sberg413.rickandmorty.data.api.ApiResult
+import com.sberg413.rickandmorty.data.remote.api.ApiResult
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.domain.model.CharacterDetail
 import com.sberg413.rickandmorty.data.model.Location

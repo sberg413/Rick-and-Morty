@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingSource.LoadParams.Refresh
 import androidx.paging.PagingSource.LoadResult.Page
 import com.sberg413.rickandmorty.api.FakeApiService
-import com.sberg413.rickandmorty.data.api.dto.CharacterDTO
+import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
 import com.sberg413.rickandmorty.util.CharacterFactory
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
@@ -31,13 +31,13 @@ class CharacterPagingSourceTest : TestCase() {
 
     private val fakeApiService = FakeApiService()
 
-    private lateinit var pagingSource: CharacterPagingSource
+    private lateinit var pagingSource: CharacterRemoteMediator
 
 
     @Before
     public override fun setUp() {
         MockitoAnnotations.openMocks(this)
-        pagingSource = CharacterPagingSource(fakeApiService, "", "")
+        pagingSource = CharacterRemoteMediator( "", "")
     }
 
 

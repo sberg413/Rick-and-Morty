@@ -3,8 +3,8 @@ package com.sberg413.rickandmorty.data.repository
 import androidx.paging.testing.asSnapshot
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData.readJsonFile
-import com.sberg413.rickandmorty.data.api.CharacterService
-import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
+import com.sberg413.rickandmorty.data.remote.api.CharacterService
+import com.sberg413.rickandmorty.data.remote.dto.CharacterListApi
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.ExperimentalCoroutinesApi

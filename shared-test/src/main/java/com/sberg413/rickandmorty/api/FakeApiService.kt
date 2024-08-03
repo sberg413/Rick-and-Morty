@@ -1,9 +1,9 @@
 package com.sberg413.rickandmorty.api
 
-import com.sberg413.rickandmorty.data.api.CharacterService
-import com.sberg413.rickandmorty.data.api.LocationService
-import com.sberg413.rickandmorty.data.api.dto.CharacterDTO
-import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
+import com.sberg413.rickandmorty.data.remote.api.CharacterService
+import com.sberg413.rickandmorty.data.remote.api.LocationService
+import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
+import com.sberg413.rickandmorty.data.remote.dto.CharacterListApi
 import com.sberg413.rickandmorty.data.model.Location
 import retrofit2.Response
 import kotlin.math.ceil

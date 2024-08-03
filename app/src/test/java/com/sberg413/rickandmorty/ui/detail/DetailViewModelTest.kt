@@ -3,7 +3,7 @@ package com.sberg413.rickandmorty.ui.detail
 import androidx.lifecycle.SavedStateHandle
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.data.api.ApiResult
+import com.sberg413.rickandmorty.data.remote.api.ApiResult
 import com.sberg413.rickandmorty.domain.model.CharacterDetail
 import com.sberg413.rickandmorty.domain.usecase.GetCharacterDetailUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi

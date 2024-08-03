@@ -1,10 +1,12 @@
 package com.sberg413.rickandmorty.di
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
-import com.sberg413.rickandmorty.data.api.CharacterService
-import com.sberg413.rickandmorty.data.api.LocationService
-import com.sberg413.rickandmorty.data.db.AppDatabase
+import androidx.room.RoomDatabase
+import com.sberg413.rickandmorty.data.remote.api.CharacterService
+import com.sberg413.rickandmorty.data.remote.api.LocationService
+import com.sberg413.rickandmorty.data.local.db.AppDatabase
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -18,6 +20,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.Executors
 import javax.inject.Singleton
 
 @ExcludeFromJacocoGeneratedReport
@@ -28,6 +31,7 @@ class AppModule {
     companion object {
         private const val BASE_URL = "https://rickandmortyapi.com/api/"
         private const val DB_NAME = "rick_and_morty.db"
+        private const val ENABLE_DB_LOGS = false
     }
 
     @Provides
@@ -58,10 +62,19 @@ class AppModule {
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java, DB_NAME
-        ).build()
+        val builder = Room.databaseBuilder(context, AppDatabase::class.java, DB_NAME)
+        if (ENABLE_DB_LOGS) {
+            builder.setQueryCallback(
+                { sqlQuery, bindArgs ->
+                    Log.v(
+                        AppDatabase::class.simpleName,
+                        "Query: $sqlQuery | Args: $bindArgs"
+                    )
+                },
+                Executors.newSingleThreadExecutor()
+            )
+        }
+        return builder.build()
     }
 
     @Provides

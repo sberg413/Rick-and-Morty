@@ -1,7 +1,7 @@
-package com.sberg413.rickandmorty.data.api
+package com.sberg413.rickandmorty.data.remote.api
 
-import com.sberg413.rickandmorty.data.api.dto.CharacterListApi
-import com.sberg413.rickandmorty.data.api.dto.CharacterDTO
+import com.sberg413.rickandmorty.data.remote.dto.CharacterListApi
+import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path

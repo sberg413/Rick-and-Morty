@@ -1,4 +1,4 @@
-package com.sberg413.rickandmorty.data.api.dto
+package com.sberg413.rickandmorty.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 
 @Entity(tableName = "characters")
-data class CharacterDTO(
+data class CharacterEntity(
     @PrimaryKey val id: Int,
     val created: String,
     val gender: String,
@@ -30,17 +30,4 @@ data class CharacterDTO(
         val name: String,
         val url: String
     )
-
-}
-
-class Converters {
-    @TypeConverter
-    fun fromString(value: String): List<String> {
-        return value.split(",").map { it.trim() }
-    }
-
-    @TypeConverter
-    fun fromList(list: List<String>): String {
-        return list.joinToString(",")
-    }
 }

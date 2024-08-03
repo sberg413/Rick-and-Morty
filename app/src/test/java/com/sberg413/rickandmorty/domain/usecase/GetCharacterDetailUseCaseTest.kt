@@ -1,7 +1,7 @@
 package com.sberg413.rickandmorty.domain.usecase
 
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.data.api.ApiResult
+import com.sberg413.rickandmorty.data.remote.api.ApiResult
 import com.sberg413.rickandmorty.data.repository.CharacterRepository
 import com.sberg413.rickandmorty.data.repository.LocationRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi

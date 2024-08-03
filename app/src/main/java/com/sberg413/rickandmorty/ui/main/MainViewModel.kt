@@ -46,7 +46,7 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
     val listData: Flow<PagingData<Character>> = _characterFilterFlow
         .flatMapLatest {
             Log.d(TAG, "Fetching character list with filter: $it")
-            characterRepository.getCharacterList(it.searchFilter.search, it.statusFilter.status)
+            characterRepository.getCharacterList(it.searchFilter.search ?: "", it.statusFilter.status ?: "")
                 .catch { e ->
                     Log.e(TAG, "Error fetching character list,", e)
                 }

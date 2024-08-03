@@ -1,8 +1,8 @@
 package com.sberg413.rickandmorty.data.remote
 
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.data.api.ApiResult
-import com.sberg413.rickandmorty.data.api.LocationService
+import com.sberg413.rickandmorty.data.remote.api.ApiResult
+import com.sberg413.rickandmorty.data.remote.api.LocationService
 import com.sberg413.rickandmorty.data.model.Location
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

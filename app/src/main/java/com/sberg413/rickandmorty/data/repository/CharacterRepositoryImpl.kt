@@ -6,10 +6,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.sberg413.rickandmorty.data.api.ApiResult
-import com.sberg413.rickandmorty.data.api.CharacterService
-import com.sberg413.rickandmorty.data.api.dto.CharacterDTO
-import com.sberg413.rickandmorty.data.db.AppDatabase
+import com.sberg413.rickandmorty.data.remote.api.ApiResult
+import com.sberg413.rickandmorty.data.remote.api.CharacterService
+import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
+import com.sberg413.rickandmorty.data.local.db.AppDatabase
+import com.sberg413.rickandmorty.data.local.entity.CharacterEntity
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,20 +29,21 @@ class CharacterRepositoryImpl @Inject constructor(
 ) : CharacterRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    override suspend fun getCharacterList(search: String?, status: String?) : Flow<PagingData<Character>> {
+    override suspend fun getCharacterList(search: String, status: String) : Flow<PagingData<Character>> {
         Log.d(TAG,"getCharacterList() name= $search | status= $status ")
         return Pager(
             config = PagingConfig(
-                pageSize = NETWORK_PAGE_SIZE,
-                enablePlaceholders = false
+                pageSize = NETWORK_PAGE_SIZE
             ),
-            pagingSourceFactory = { CharacterPagingSource(characterService, search, status) },
             remoteMediator = CharacterRemoteMediator(
                 search,
                 status,
                 characterService,
                 appDatabase
-            )
+            ),
+            pagingSourceFactory = {
+                appDatabase.characterDao().getPagingSource(search, status)
+            }
         )
             .flow
             .map { pagingData ->
@@ -66,6 +68,19 @@ class CharacterRepositoryImpl @Inject constructor(
         const val NETWORK_PAGE_SIZE = 20
 
         private fun CharacterDTO.toCharacter(): Character {
+            return Character(
+                id,
+                status,
+                species,
+                type,
+                gender,
+                origin.url.split("/").last(),
+                location.url.split("/").last(),
+                image,
+                name)
+        }
+
+        private fun CharacterEntity.toCharacter(): Character {
             return Character(
                 id,
                 status,

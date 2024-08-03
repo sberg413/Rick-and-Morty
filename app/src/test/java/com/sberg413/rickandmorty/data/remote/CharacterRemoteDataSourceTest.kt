@@ -1,8 +1,8 @@
 package com.sberg413.rickandmorty.data.remote
 
-import com.sberg413.rickandmorty.data.api.ApiResult
-import com.sberg413.rickandmorty.data.api.CharacterService
-import com.sberg413.rickandmorty.data.api.dto.CharacterDTO
+import com.sberg413.rickandmorty.data.remote.api.ApiResult
+import com.sberg413.rickandmorty.data.remote.api.CharacterService
+import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
 import com.sberg413.rickandmorty.data.model.Character
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

@@ -2,7 +2,7 @@ package com.sberg413.rickandmorty.data.repository
 
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData.TEST_LOCATION
-import com.sberg413.rickandmorty.data.api.ApiResult
+import com.sberg413.rickandmorty.data.remote.api.ApiResult
 import com.sberg413.rickandmorty.data.remote.LocationRemoteDataSource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
