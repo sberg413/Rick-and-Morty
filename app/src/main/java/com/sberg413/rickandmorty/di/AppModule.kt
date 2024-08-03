@@ -1,12 +1,16 @@
 package com.sberg413.rickandmorty.di
 
+import android.content.Context
+import androidx.room.Room
 import com.sberg413.rickandmorty.data.api.CharacterService
 import com.sberg413.rickandmorty.data.api.LocationService
+import com.sberg413.rickandmorty.data.db.AppDatabase
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +27,7 @@ class AppModule {
 
     companion object {
         private const val BASE_URL = "https://rickandmortyapi.com/api/"
+        private const val DB_NAME = "rick_and_morty.db"
     }
 
     @Provides
@@ -49,6 +54,15 @@ class AppModule {
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java, DB_NAME
+        ).build()
+    }
 
     @Provides
     @Singleton

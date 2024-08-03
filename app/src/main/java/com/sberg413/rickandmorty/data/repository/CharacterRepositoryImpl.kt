@@ -1,6 +1,7 @@
 package com.sberg413.rickandmorty.data.repository
 
 import android.util.Log
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -8,6 +9,7 @@ import androidx.paging.map
 import com.sberg413.rickandmorty.data.api.ApiResult
 import com.sberg413.rickandmorty.data.api.CharacterService
 import com.sberg413.rickandmorty.data.api.dto.CharacterDTO
+import com.sberg413.rickandmorty.data.db.AppDatabase
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,9 +23,11 @@ import javax.inject.Inject
 class CharacterRepositoryImpl @Inject constructor(
     private val characterService: CharacterService,
     private val characterRemoteDataSource: CharacterRemoteDataSource,
+    private val appDatabase: AppDatabase,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : CharacterRepository {
 
+    @OptIn(ExperimentalPagingApi::class)
     override suspend fun getCharacterList(search: String?, status: String?) : Flow<PagingData<Character>> {
         Log.d(TAG,"getCharacterList() name= $search | status= $status ")
         return Pager(
@@ -31,7 +35,13 @@ class CharacterRepositoryImpl @Inject constructor(
                 pageSize = NETWORK_PAGE_SIZE,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { CharacterPagingSource(characterService, search, status) }
+            pagingSourceFactory = { CharacterPagingSource(characterService, search, status) },
+            remoteMediator = CharacterRemoteMediator(
+                search,
+                status,
+                characterService,
+                appDatabase
+            )
         )
             .flow
             .map { pagingData ->

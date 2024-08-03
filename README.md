@@ -9,6 +9,7 @@ This implementation shows off several best practices, libraries, and concepts. A
 * Jetpack Compose
 * Architecture APIs
 * Androidx Paging3
+* Room DB
 * ViewModel
 * Hilt DI
 * Flow
@@ -18,7 +19,6 @@ This implementation shows off several best practices, libraries, and concepts. A
 A TODO list if more time were to be dedicated to the project is as follows:
 * Implement better error handling for bad network and response error scenarios
 * Replace hardcoded strings with resource strings
-* Implement Room db to cache the api requests
 * Improve the UI with an improved color palette.
 * Implement dark theme
 * Implement additional details with additional click-throughs (episodes, planets, etc.)
