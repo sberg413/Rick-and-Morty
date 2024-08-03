@@ -1,8 +1,8 @@
-package com.sberg413.rickandmorty.domain
+package com.sberg413.rickandmorty.domain.usecase
 
 import com.sberg413.rickandmorty.data.api.ApiResult
 import com.sberg413.rickandmorty.data.model.Character
-import com.sberg413.rickandmorty.data.model.CharacterDetail
+import com.sberg413.rickandmorty.domain.model.CharacterDetail
 import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.data.repository.CharacterRepository
 import com.sberg413.rickandmorty.data.repository.LocationRepository
