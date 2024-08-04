@@ -1,4 +1,4 @@
-package com.sberg413.rickandmorty.data.repository
+package com.sberg413.rickandmorty.data.remote
 
 import android.util.Log
 import androidx.paging.ExperimentalPagingApi

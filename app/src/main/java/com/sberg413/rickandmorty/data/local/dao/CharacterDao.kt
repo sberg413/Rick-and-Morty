@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.sberg413.rickandmorty.data.local.entity.CharacterEntity
+import org.jetbrains.annotations.TestOnly
 
 @Dao
 interface CharacterDao {
@@ -15,8 +16,8 @@ interface CharacterDao {
     @Query("SELECT * FROM characters WHERE id = :id")
     suspend fun getCharacterById(id: Int): CharacterEntity?
 
-//    @Query("SELECT * FROM characters WHERE name LIKE '%' || :name || '%' AND status LIKE '%' || :status || '%' LIMIT :loadSize OFFSET :offset")
-//    suspend fun getCharactersByQuery(name: String, status: String, loadSize: Int, offset: Int): List<CharacterEntity>
+    @Query("SELECT * FROM characters")
+    suspend fun getAllCharacters(): List<CharacterEntity>
 
     @Query("SELECT * FROM characters WHERE name LIKE '%' || :name || '%' AND status LIKE '%' || :status || '%'")
     fun getPagingSource(name: String, status: String): PagingSource<Int, CharacterEntity>

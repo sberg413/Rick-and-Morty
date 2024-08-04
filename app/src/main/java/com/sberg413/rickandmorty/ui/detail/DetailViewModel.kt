@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sberg413.rickandmorty.data.remote.api.ApiResult
+import com.sberg413.rickandmorty.data.ApiResult
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.domain.usecase.GetCharacterDetailUseCase

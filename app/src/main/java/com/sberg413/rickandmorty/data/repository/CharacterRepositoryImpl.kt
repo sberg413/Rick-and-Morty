@@ -6,13 +6,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.sberg413.rickandmorty.data.remote.api.ApiResult
+import com.sberg413.rickandmorty.data.ApiResult
 import com.sberg413.rickandmorty.data.remote.api.CharacterService
 import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
 import com.sberg413.rickandmorty.data.local.db.AppDatabase
 import com.sberg413.rickandmorty.data.local.entity.CharacterEntity
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
+import com.sberg413.rickandmorty.data.remote.CharacterRemoteMediator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +30,7 @@ class CharacterRepositoryImpl @Inject constructor(
 ) : CharacterRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    override suspend fun getCharacterList(search: String, status: String) : Flow<PagingData<Character>> {
+    override suspend fun getCharacterList(search: String?, status: String?) : Flow<PagingData<Character>> {
         Log.d(TAG,"getCharacterList() name= $search | status= $status ")
         return Pager(
             config = PagingConfig(
@@ -42,7 +43,7 @@ class CharacterRepositoryImpl @Inject constructor(
                 appDatabase
             ),
             pagingSourceFactory = {
-                appDatabase.characterDao().getPagingSource(search, status)
+                appDatabase.characterDao().getPagingSource(search ?: "", status ?: "")
             }
         )
             .flow

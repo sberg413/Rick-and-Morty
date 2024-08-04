@@ -1,9 +1,9 @@
 package com.sberg413.rickandmorty.data.remote
 
-import com.sberg413.rickandmorty.data.remote.api.ApiResult
+import com.sberg413.rickandmorty.data.ApiResult
 import com.sberg413.rickandmorty.data.remote.api.CharacterService
 import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
-import com.sberg413.rickandmorty.data.remote.api.handleApiResponse
+import com.sberg413.rickandmorty.data.handleApiResponse
 import javax.inject.Inject
 
 class CharacterRemoteDataSource @Inject constructor(

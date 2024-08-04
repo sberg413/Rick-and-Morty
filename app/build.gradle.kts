@@ -126,6 +126,7 @@ dependencies {
     implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
 
+    androidTestImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.room.testing)
     /**** Room End ****/
 
@@ -137,6 +138,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit.ktx)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.mockito.core)
+    // androidTestImplementation(libs.mockito.inline)
+    androidTestImplementation(libs.mockito.android)
     kaptAndroidTest(libs.hilt.compiler)
 
     testImplementation(project(":shared-test"))
