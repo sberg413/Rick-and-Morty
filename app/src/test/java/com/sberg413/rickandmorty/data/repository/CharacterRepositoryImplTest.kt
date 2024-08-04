@@ -3,9 +3,10 @@ package com.sberg413.rickandmorty.data.repository
 import androidx.paging.testing.asSnapshot
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData.readJsonFile
+import com.sberg413.rickandmorty.data.local.db.AppDatabase
+import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
 import com.sberg413.rickandmorty.data.remote.api.CharacterService
 import com.sberg413.rickandmorty.data.remote.dto.CharacterListApi
-import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -17,8 +18,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mockito.mock
+import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
 
 class CharacterRepositoryImplTest {
 
@@ -28,14 +30,19 @@ class CharacterRepositoryImplTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule(testDispatcher)
 
-    private val mockApiServices: CharacterService = mock()
-    private val mockRemoteDataSource: CharacterRemoteDataSource = mock()
+    @Mock
+    private lateinit var mockApiServices: CharacterService
+    @Mock
+    private lateinit var mockRemoteDataSource: CharacterRemoteDataSource
+    @Mock
+    private lateinit var mockAppDatabase: AppDatabase
 
     private lateinit var characterRepositoryImpl: CharacterRepositoryImpl
 
     @Before
     fun setUp() {
-        characterRepositoryImpl = CharacterRepositoryImpl(mockApiServices, mockRemoteDataSource, testDispatcher)
+        MockitoAnnotations.openMocks(this)
+        characterRepositoryImpl = CharacterRepositoryImpl(mockApiServices, mockRemoteDataSource, mockAppDatabase, testDispatcher)
     }
 
     @After
@@ -51,7 +58,7 @@ class CharacterRepositoryImplTest {
        `when`(mockApiServices.getCharacterList(anyInt(), any(), any())).thenReturn(characterListApi)
 
         // Then
-        val list = characterRepositoryImpl.getCharacterList(null, null).asSnapshot()
+        val list = characterRepositoryImpl.getCharacterList("", "").asSnapshot()
 
         // Verify
         assertEquals(40, list.size)

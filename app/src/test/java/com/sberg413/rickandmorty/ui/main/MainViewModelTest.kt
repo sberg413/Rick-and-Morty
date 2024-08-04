@@ -93,7 +93,7 @@ class MainViewModelTest : TestCase() {
         }
 
         assertEquals(characterList, values[1].collectDataForTest(testDispatcher))
-        verify(characterRepository, times(1)).getCharacterList(null,null)
+        verify(characterRepository, times(1)).getCharacterList("","")
 
         collectJob.cancel()
     }
@@ -108,7 +108,7 @@ class MainViewModelTest : TestCase() {
         viewModel.setSearchFilter(SEARCH_MORTY)
 
         assertEquals(characterList, values[2].collectDataForTest(testDispatcher))
-        verify(characterRepository, times(1)).getCharacterList(SEARCH_MORTY,null)
+        verify(characterRepository, times(1)).getCharacterList(SEARCH_MORTY,"")
 
         collectJob.cancel()
     }
@@ -123,7 +123,7 @@ class MainViewModelTest : TestCase() {
         viewModel.setStatusFilter(STATUS_ALIVE)
 
         assertEquals(characterList, values[2].collectDataForTest(testDispatcher))
-        verify(characterRepository, times(1)).getCharacterList(null, STATUS_ALIVE)
+        verify(characterRepository, times(1)).getCharacterList("", STATUS_ALIVE)
 
         collectJob.cancel()
     }

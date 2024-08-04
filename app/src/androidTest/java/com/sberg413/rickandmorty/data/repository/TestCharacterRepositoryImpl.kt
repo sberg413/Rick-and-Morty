@@ -14,7 +14,7 @@ class TestCharacterRepositoryImpl @Inject constructor(): CharacterRepository {
 
     var characterResponse: ApiResult<Character> = ApiResult.Success(TestData.TEST_CHARACTER)
 
-    override suspend fun getCharacterList(search: String?, status: String?): Flow<PagingData<Character>> = flow {
+    override suspend fun getCharacterList(search: String, status: String): Flow<PagingData<Character>> = flow {
         emit(PagingData.empty())
     }
 
