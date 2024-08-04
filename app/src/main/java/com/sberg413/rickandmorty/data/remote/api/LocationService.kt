@@ -1,4 +1,4 @@
-package com.sberg413.rickandmorty.data.api
+package com.sberg413.rickandmorty.data.remote.api
 
 import com.sberg413.rickandmorty.data.model.Location
 import retrofit2.Response

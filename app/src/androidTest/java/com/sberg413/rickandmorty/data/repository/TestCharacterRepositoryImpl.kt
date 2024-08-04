@@ -2,7 +2,7 @@ package com.sberg413.rickandmorty.data.repository
 
 import androidx.paging.PagingData
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.data.api.ApiResult
+import com.sberg413.rickandmorty.data.ApiResult
 import com.sberg413.rickandmorty.data.model.Character
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

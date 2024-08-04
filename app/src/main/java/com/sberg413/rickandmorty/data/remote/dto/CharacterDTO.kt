@@ -1,4 +1,4 @@
-package com.sberg413.rickandmorty.data.api.dto
+package com.sberg413.rickandmorty.data.remote.dto
 
 data class CharacterDTO(
     val created: String,

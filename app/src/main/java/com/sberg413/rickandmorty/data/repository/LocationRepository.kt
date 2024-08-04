@@ -1,6 +1,6 @@
 package com.sberg413.rickandmorty.data.repository
 
-import com.sberg413.rickandmorty.data.api.ApiResult
+import com.sberg413.rickandmorty.data.ApiResult
 import com.sberg413.rickandmorty.data.model.Location
 
 

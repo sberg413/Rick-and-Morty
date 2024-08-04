@@ -119,6 +119,17 @@ dependencies {
     implementation(libs.androidx.ui.test.manifest)
     /**** COMPOSE END ****/
 
+    /**** Room Start ****/
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
+    ksp(libs.androidx.room.compiler)
+
+    androidTestImplementation(libs.androidx.room.testing)
+    testImplementation(libs.androidx.room.testing)
+    /**** Room End ****/
+
     androidTestImplementation(project(":shared-test"))
     androidTestImplementation(libs.androidx.core)
     androidTestImplementation(libs.androidx.fragment.testing)
@@ -127,6 +138,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit.ktx)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.mockito.core)
+    // androidTestImplementation(libs.mockito.inline)
+    androidTestImplementation(libs.mockito.android)
     kaptAndroidTest(libs.hilt.compiler)
 
     testImplementation(project(":shared-test"))
@@ -140,6 +154,9 @@ dependencies {
     testImplementation(libs.androidx.paging.testing)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
+
+
+
 }
 
 kapt {
