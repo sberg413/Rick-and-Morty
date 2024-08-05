@@ -174,14 +174,15 @@ jacoco {
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
+    // dependsOn("testDebugUnitTest", "createDebugCoverageReport")
 
     reports {
         xml.required.set(true)
         html.required.set(true)
-        csv.required.set(false)
+        csv.required.set(false) // Explicitly disable CSV reports if not needed
     }
 
+    // Use a constant for file filters for better maintainability
     val fileFilter = listOf(
         "**/R.class",
         "**/R$*.class",
@@ -191,39 +192,33 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "android/**/*.*"
     )
 
-    val kotlinTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
-        exclude(fileFilter + "**/*Activity.class" + "**/*Fragment.class" + "**/*Application.class")
+    // Extract common logic for fileTree configurations into a function
+    fun configureFileTree(dir: String, additionalExcludes: List<String> = emptyList()): FileTree {
+        return fileTree(dir) {
+            exclude(fileFilter + additionalExcludes)
+        }
     }
-    val javacTree = fileTree("$buildDir/intermediates/javac/debug") {
-        exclude(fileFilter)
-    }
-    val hiltTree = fileTree("$buildDir/intermediates/classes/debug/transformDebugClassesWithAsm/dirs/") {
+
+    val kotlinTree =configureFileTree("${layout.buildDirectory}/tmp/kotlin-classes/debug",
+        listOf("**/*Activity.class", "**/*Fragment.class", "**/*Application.class"))
+    val javacTree = configureFileTree("${layout.buildDirectory}/intermediates/javac/debug")
+    val hiltTree = fileTree("${layout.buildDirectory}/intermediates/classes/debug/transformDebugClassesWithAsm/dirs/") {
         include("**/Hilt_*.class")
     }
 
-    val mainSrc = fileTree("${project.projectDir}/src/main/java"){
-        // Exclude Hilt Module files
-        exclude(listOf("**/di/*.kt"))
+    val mainSrc = fileTree("${project.projectDir}/src/main/java") {
+        exclude("**/di/*.kt") // Exclude Hilt Module files
     }
-//    val hiltSrc =  fileTree("$buildDir/generated/source/kapt/debug") {
-//        include(listOf("**/Hilt_*.java"))
-//    }
 
     sourceDirectories.setFrom(mainSrc)
     classDirectories.setFrom(kotlinTree, javacTree, hiltTree)
     executionData.setFrom(
         fileTree(layout.buildDirectory) {
-            include(listOf("**/*.exec", "**/*.ec"))
+            include(
+                "outputs/code_coverage/debugAndroidTest/connected/*coverage.ec",
+                "jacoco/testDebugUnitTest.exec"
+
+            )
         }
     )
-
-
-    // For multi-module projects, you may need to include additional modules:
-    // subprojects {
-    //     tasks.withType<JacocoReport> {
-    //         additionalSourceDirs.setFrom(files("$projectDir/src/main/java"))
-    //         additionalClassDirs.setFrom(files("$buildDir/intermediates/classes/debug"))
-    //         additionalExecutionData.setFrom(files("$buildDir/jacoco/testDebugUnitTest.exec"))
-    //     }
-    // }
 }
