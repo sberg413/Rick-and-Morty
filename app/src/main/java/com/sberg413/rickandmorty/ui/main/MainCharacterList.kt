@@ -74,7 +74,7 @@ fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modif
                             characters[index]?.let { item ->
                                 CharacterListItem(
                                     character = item,
-                                    modifier = Modifier,
+                                    modifier = modifier,
                                     clickListener = onItemClicked
                                 )
                             }
@@ -112,6 +112,7 @@ fun CharacterListItem(character: Character, modifier: Modifier = Modifier, click
                     text = character.name,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
             Row(modifier = modifier.padding(
@@ -119,12 +120,14 @@ fun CharacterListItem(character: Character, modifier: Modifier = Modifier, click
             )) {
                 Text(
                     text = character.status,
-                    modifier = modifier.padding(end = 10.dp)
+                    modifier = modifier.padding(end = 10.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Text(
                     text = character.species,
-                    modifier = modifier
+                    modifier = modifier,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -160,7 +163,8 @@ fun EmptyResultsView(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(id = R.string.no_results),
             textAlign = TextAlign.Center,
-            fontSize = dimensionResource(id = R.dimen.repo_name_size).value.sp
+            fontSize = dimensionResource(id = R.dimen.repo_name_size).value.sp,
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
