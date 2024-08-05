@@ -214,7 +214,12 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     classDirectories.setFrom(kotlinTree, javacTree, hiltTree)
     executionData.setFrom(
         fileTree(layout.buildDirectory) {
-            include("**/*.exec", "**/*.ec")
+            include(
+                listOf(
+                    "jacoco/testDebugUnitTest.exec",
+                    "outputs/code_coverage/debugAndroidTest/connected/*coverage.ec"
+                )
+            )
         }
     )
 }
