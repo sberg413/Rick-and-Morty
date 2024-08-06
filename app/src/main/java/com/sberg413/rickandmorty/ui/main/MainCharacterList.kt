@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -74,7 +75,6 @@ fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modif
                             characters[index]?.let { item ->
                                 CharacterListItem(
                                     character = item,
-                                    modifier = Modifier,
                                     clickListener = onItemClicked
                                 )
                             }
@@ -92,43 +92,52 @@ fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modif
 @Composable
 fun CharacterListItem(character: Character, modifier: Modifier = Modifier, clickListener: (Character) -> Unit) {
 
-    Row(
-        modifier
+    Surface(
+        modifier = modifier
             .fillMaxWidth()
             .clickable { clickListener(character) }
-            .padding(16.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 4.dp,
+        color = MaterialTheme.colorScheme.surface
     ) {
+        Row(modifier = Modifier.padding(12.dp)) {
 
+            GlideImage(
+                model = character.image,
+                contentDescription = character.name,
+                modifier = modifier.size(60.dp),
+                loading = placeholder(R.drawable.avatar_placeholder)
+            )
 
-        GlideImage(
-            model = character.image,
-            contentDescription = character.name,
-            modifier = modifier.size(60.dp),
-            loading = placeholder(R.drawable.avatar_placeholder)
-        )
-
-        Column (modifier = modifier.padding(start = 15.dp)){
+            Column(modifier = modifier.padding(start = 15.dp)) {
                 Text(
                     text = character.name,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-            Row(modifier = modifier.padding(
-                top = 5.dp
-            )) {
-                Text(
-                    text = character.status,
-                    modifier = modifier.padding(end = 10.dp)
-                )
+                Row(
+                    modifier = modifier.padding(
+                        top = 5.dp
+                    )
+                ) {
+                    Text(
+                        text = character.status,
+                        modifier = modifier.padding(end = 10.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
-                Text(
-                    text = character.species,
-                    modifier = modifier
-                )
+                    Text(
+                        text = character.species,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-        }
 
+        }
     }
 }
 
@@ -160,7 +169,8 @@ fun EmptyResultsView(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(id = R.string.no_results),
             textAlign = TextAlign.Center,
-            fontSize = dimensionResource(id = R.dimen.repo_name_size).value.sp
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }

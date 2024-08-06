@@ -72,11 +72,13 @@ fun CharacterDetailDescription() {
 
 @Composable
 fun CharacterDetailContent(characterData: Character, locationData: Location?) {
-    Surface {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CharacterImage(url = characterData.image, name = characterData.name)
@@ -84,6 +86,7 @@ fun CharacterDetailContent(characterData: Character, locationData: Location?) {
             Text(
                 text = characterData.name,
                 style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 18.dp)
@@ -113,18 +116,24 @@ private fun CharacterDetailRow(modifier: Modifier =  Modifier, @StringRes label:
             .fillMaxWidth()) {
         Text(
             text = stringResource(id = label),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .weight(1f),
             textAlign =  TextAlign.End
         )
         Text(
             text = ":",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
         )
 
         Text(
             text = data,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .weight(1f)
                 .testTag(stringResource(label)),
@@ -186,7 +195,7 @@ fun ShowErrorStateToast(errMsg: String) {
     errMsg.let {
         Toast.makeText(
             context,
-            "ERROR: ${it}",
+            "ERROR: $it",
             Toast.LENGTH_SHORT
         ).show()
     }
