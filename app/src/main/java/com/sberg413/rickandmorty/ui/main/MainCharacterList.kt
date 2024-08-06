@@ -75,7 +75,6 @@ fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modif
                             characters[index]?.let { item ->
                                 CharacterListItem(
                                     character = item,
-                                    modifier = modifier,
                                     clickListener = onItemClicked
                                 )
                             }
