@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.navigation.safeargs)
-    jacoco
 }
 
 android {
@@ -31,7 +30,7 @@ android {
             enableAndroidTestCoverage= true
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -169,62 +168,4 @@ hilt {
     enableAggregatingTask = true
 }
 
-jacoco {
-    toolVersion = "0.8.8"
-    // reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
-}
-
-tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
-
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        csv.required.set(false)
-    }
-
-    val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*"
-    )
-
-    val kotlinTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
-        exclude(fileFilter + "**/*Activity.class" + "**/*Fragment.class" + "**/*Application.class")
-    }
-    val javacTree = fileTree("$buildDir/intermediates/javac/debug") {
-        exclude(fileFilter)
-    }
-    val hiltTree = fileTree("$buildDir/intermediates/classes/debug/transformDebugClassesWithAsm/dirs/") {
-        include("**/Hilt_*.class")
-    }
-
-    val mainSrc = fileTree("${project.projectDir}/src/main/java"){
-        // Exclude Hilt Module files
-        exclude(listOf("**/di/*.kt"))
-    }
-//    val hiltSrc =  fileTree("$buildDir/generated/source/kapt/debug") {
-//        include(listOf("**/Hilt_*.java"))
-//    }
-
-    sourceDirectories.setFrom(mainSrc)
-    classDirectories.setFrom(kotlinTree, javacTree, hiltTree)
-    executionData.setFrom(
-        fileTree(layout.buildDirectory) {
-            include(listOf("**/*.exec", "**/*.ec"))
-        }
-    )
-
-
-    // For multi-module projects, you may need to include additional modules:
-    // subprojects {
-    //     tasks.withType<JacocoReport> {
-    //         additionalSourceDirs.setFrom(files("$projectDir/src/main/java"))
-    //         additionalClassDirs.setFrom(files("$buildDir/intermediates/classes/debug"))
-    //         additionalExecutionData.setFrom(files("$buildDir/jacoco/testDebugUnitTest.exec"))
-    //     }
-    // }
-}
+apply( from = "$rootDir/jacoco.gradle")
