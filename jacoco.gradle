@@ -1,0 +1,57 @@
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+tasks.withType(Test).configureEach {
+    jacoco.includeNoLocationClasses = true
+    // https://hithub.com/gradle/gradle/issues/5184
+    jacoco.excludes = ['jdk.internal.*']
+}
+
+tasks.register('jacocoTestReport', JacocoReport) {
+    dependsOn 'testDebugUnitTest' // , 'createDebugCoverageReport'
+
+
+    def fileFilter = [
+            '**/R.class',
+            '**/R$*.class',
+            '**/BuildConfig.*',
+            '**/Manifest*.*',
+            '**/*Test*.*',
+            '**/di/**/*.*',  // Adjust this based on your DI setup
+            '**/hilt_aggregated_deps/**/*.*',  // Hilt aggregated dependencies
+            '**/dagger/**/*.*',  // Dagger generated classes
+            '**/*_Factory.*',  // Dagger generated factories
+            '**/*_MembersInjector.*',  // Dagger members injectors
+            '**/*_Provide*Factory.*',  // Dagger provides factories
+            'android/**/*.*'
+    ]
+
+    def kotlinTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug",
+        excludes: fileFilter // + ['**/*Activity.class', '**/*Fragment.class', '**/*Application.class']
+    )
+    def javacTree = fileTree(dir: "$buildDir/intermediates/javac/debug",
+        excludes: fileFilter
+    )
+//    def hiltTree = fileTree("$buildDir/intermediates/classes/debug/transformDebugClassesWithAsm/dirs/") {
+//        include '**/Hilt_*.class'
+//    }
+
+    def mainSrc = fileTree("${project.projectDir}/src/main/java") {
+        exclude '**/di/*.kt'
+    }
+
+    sourceDirectories.setFrom(mainSrc)
+    classDirectories.setFrom(kotlinTree, javacTree) // , hiltTree)
+    executionData.setFrom(fileTree(dir: project.projectDir, includes: [
+            'build/jacoco/testDebugUnitTest.exec',
+            'build/outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec'
+        ]))
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}

@@ -1,9 +1,8 @@
 # Rick & Morty Sample Android App
 This application is a sample Android app that uses [The Rick and Morty API](https://rickandmortyapi.com/) to display of list of characters. Click on a character from the list opens a more detailed view of the character.
 
-![Build Status](https://github.com/sberg413/RickMorty/actions/workflows/github-actions.yml/badge.svg)
-[![codecov](https://codecov.io/github/sberg413/RickMorty/graph/badge.svg?token=VERTJX6G1O)](https://codecov.io/github/sberg413/RickMorty)
-
+![Build Status](https://github.com/sberg413/Rick-and-Morty/actions/workflows/github-actions.yml/badge.svg)
+[![codecov](https://codecov.io/gh/sberg413/Rick-and-Morty/graph/badge.svg?token=VERTJX6G1O)](https://codecov.io/gh/sberg413/Rick-and-Morty)
 ## Features and Best Practices
 
 This project demonstrates several development best practices, modern Android libraries, and architectural concepts, including:
