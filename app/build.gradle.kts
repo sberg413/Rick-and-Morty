@@ -7,8 +7,9 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.navigation.safeargs)
-    jacoco
 }
+
+apply( from = "$rootDir/jacoco.gradle")
 
 android {
     compileSdk = 34
@@ -27,7 +28,7 @@ android {
         debug {
             // applicationIdSuffix = ".debug"
             isMinifyEnabled = false
-            enableUnitTestCoverage = true
+            // enableUnitTestCoverage = true
             enableAndroidTestCoverage= true
         }
         release {
@@ -156,8 +157,6 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
 
-
-
 }
 
 kapt {
@@ -168,5 +167,3 @@ hilt {
     // added to prevent build warning
     enableAggregatingTask = true
 }
-
-apply( from = "$rootDir/jacoco.gradle")

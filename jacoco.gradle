@@ -1,22 +1,17 @@
 apply plugin: 'jacoco'
 
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.12"
 }
-
 tasks.withType(Test).configureEach {
-    // https://hithub.com/gradle/gradle/issues/5184
     jacoco.includeNoLocationClasses = true
+    // https://hithub.com/gradle/gradle/issues/5184
+    jacoco.excludes = ['jdk.internal.*']
 }
 
 tasks.register('jacocoTestReport', JacocoReport) {
-    dependsOn 'testDebugUnitTest', 'createDebugCoverageReport'
+    dependsOn 'testDebugUnitTest' // , 'createDebugCoverageReport'
 
-    reports {
-        xml.required = true
-        html.required = true
-        csv.required = false
-    }
 
     def fileFilter = [
             '**/R.class',
@@ -33,25 +28,30 @@ tasks.register('jacocoTestReport', JacocoReport) {
             'android/**/*.*'
     ]
 
-    def kotlinTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
-        exclude fileFilter + ['**/*Activity.class', '**/*Fragment.class', '**/*Application.class']
-    }
-    def javacTree = fileTree("$buildDir/intermediates/javac/debug") {
-        exclude fileFilter
-    }
-    def hiltTree = fileTree("$buildDir/intermediates/classes/debug/transformDebugClassesWithAsm/dirs/") {
-        include '**/Hilt_*.class'
-    }
+    def kotlinTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug",
+        excludes: fileFilter // + ['**/*Activity.class', '**/*Fragment.class', '**/*Application.class']
+    )
+    def javacTree = fileTree(dir: "$buildDir/intermediates/javac/debug",
+        excludes: fileFilter
+    )
+//    def hiltTree = fileTree("$buildDir/intermediates/classes/debug/transformDebugClassesWithAsm/dirs/") {
+//        include '**/Hilt_*.class'
+//    }
 
     def mainSrc = fileTree("${project.projectDir}/src/main/java") {
         exclude '**/di/*.kt'
     }
 
     sourceDirectories.setFrom(mainSrc)
-    classDirectories.setFrom(kotlinTree, javacTree, hiltTree)
-    executionData.setFrom(fileTree(dir: layout.buildDirectory, includes:
-            ['jacoco/testDebugUnitTest.exec',
-             'outputs/code_coverage/debugAndroidTest/connected/**/coverage.ec'
+    classDirectories.setFrom(kotlinTree, javacTree) // , hiltTree)
+    executionData.setFrom(fileTree(dir: project.projectDir, includes: [
+            'build/jacoco/testDebugUnitTest.exec',
+            'build/outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec'
         ]))
 
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
 }
