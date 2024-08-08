@@ -6,19 +6,18 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.sberg413.rickandmorty.data.remote.api.CharacterService
 import com.sberg413.rickandmorty.data.local.db.AppDatabase
 import com.sberg413.rickandmorty.data.local.entity.CharacterEntity
 import com.sberg413.rickandmorty.data.local.entity.RemoteKey
-import com.sberg413.rickandmorty.data.local.entity.toEntity
+import com.sberg413.rickandmorty.data.remote.api.CharacterService
+import com.sberg413.rickandmorty.data.toEntity
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.URL
+import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
-class CharacterRemoteMediator(
-    private val queryName: String?,
-    private val queryStatus: String?,
+class CharacterRemoteMediator @Inject constructor(
     private val apiService: CharacterService,
     private val database: AppDatabase
 ) : RemoteMediator<Int, CharacterEntity>() {
@@ -39,6 +38,9 @@ class CharacterRemoteMediator(
             } else null
         }
     }
+
+    var queryName: String? = null
+    var queryStatus: String? = null
 
     override suspend fun load(
         loadType: LoadType,

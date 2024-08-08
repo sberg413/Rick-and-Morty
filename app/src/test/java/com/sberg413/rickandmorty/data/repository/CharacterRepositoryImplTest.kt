@@ -1,128 +1,128 @@
 package com.sberg413.rickandmorty.data.repository
 
-import androidx.paging.PagingData
-import androidx.paging.PagingSource
-import androidx.paging.PagingSourceFactory
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.testing.asPagingSourceFactory
 import androidx.paging.testing.asSnapshot
 import com.sberg413.rickandmorty.MainCoroutineRule
-import com.sberg413.rickandmorty.TestData.readJsonFile
+import com.sberg413.rickandmorty.TestDto
+import com.sberg413.rickandmorty.TestEntity
+import com.sberg413.rickandmorty.data.ApiResult
 import com.sberg413.rickandmorty.data.local.dao.CharacterDao
-import com.sberg413.rickandmorty.data.local.db.AppDatabase
-import com.sberg413.rickandmorty.data.local.entity.CharacterEntity
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
-import com.sberg413.rickandmorty.data.remote.api.CharacterService
-import com.sberg413.rickandmorty.data.remote.dto.CharacterListApi
-import com.sberg413.rickandmorty.util.collectDataForTest
-import com.squareup.moshi.Moshi
+import com.sberg413.rickandmorty.data.remote.CharacterRemoteMediator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 
+@ExperimentalCoroutinesApi
+@RunWith(MockitoJUnitRunner::class)
 class CharacterRepositoryImplTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    @Mock
+    private lateinit var characterRemoteMediator: CharacterRemoteMediator
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @Mock
+    private lateinit var characterRemoteDataSource: CharacterRemoteDataSource
+
+    @Mock
+    private lateinit var characterDao: CharacterDao
+
+    private lateinit var characterRepository: CharacterRepository
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
     val coroutineRule = MainCoroutineRule(testDispatcher)
 
-    @Mock
-    private lateinit var mockApiServices: CharacterService
-    @Mock
-    private lateinit var mockRemoteDataSource: CharacterRemoteDataSource
-    @Mock
-    private lateinit var mockAppDatabase: AppDatabase
-    @Mock
-    private lateinit var mockCharacterDao: CharacterDao
-
-    private lateinit var characterRepositoryImpl: CharacterRepositoryImpl
-
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        `when`(mockAppDatabase.characterDao()).thenReturn(mockCharacterDao)
-        characterRepositoryImpl = CharacterRepositoryImpl(mockApiServices, mockRemoteDataSource, mockAppDatabase, testDispatcher)
+        characterRepository = CharacterRepositoryImpl(
+            null,
+            characterRemoteDataSource,
+            characterDao,
+            testDispatcher
+        )
     }
 
     @After
     fun tearDown() {
     }
 
+    @OptIn(ExperimentalPagingApi::class)
     @Test
-    @Ignore("May need to pass in the RemoteDataSource with DI!")
-    fun getCharacterList() = runTest {
-        val testEntity = createTestCharacterEntity()
-        val pagingSourceLoadResult = PagingSource.LoadResult.Page<Int,CharacterEntity>(
-            data = listOf(testEntity),
-            prevKey = null,
-            nextKey = null
+    fun testGetCharacterList() = runTest {
+        val characterEntities = listOf(
+            TestEntity.testCharacterEntity
         )
-        val fakePagingSource = FakePagingSource().apply {
-            this.loadResult = pagingSourceLoadResult
+        val pagingSourceFactory = characterEntities.asPagingSourceFactory()
+        val pagingSource = pagingSourceFactory()
+        `when`(characterDao.getPagingSource(anyString(), anyString())).thenReturn(pagingSource)
+        // `when`(characterRemoteMediator.load(any(LoadType::class.java), any(PagingState::class.java) as PagingState<Int,CharacterEntity>)).thenReturn(mock())
+
+        val characterList = mutableListOf<Character>()
+        val job = launch(testDispatcher) {
+            characterRepository.getCharacterList("Rick", "Alive").asSnapshot().toCollection(characterList)
         }
+        advanceUntilIdle()
 
-        `when`(
-            mockAppDatabase.characterDao().getPagingSource("", "")
-        ).thenReturn(fakePagingSource)
+        assertEquals(characterList[0].id, characterList[0].id)
+        assertEquals(characterList[0].name, characterList[0].name)
+        assertEquals(characterList[0].status, characterList[0].status)
+        assertEquals(characterList[0].species, characterList[0].species)
 
+        job.cancel()
 
-        val values = mutableListOf<PagingData<Character>>()
-        val collectJob = launch(testScheduler) {
-            characterRepositoryImpl.getCharacterList(null, null).toList(values)
-        }
-        testDispatcher.scheduler.advanceUntilIdle()
-        val list = values[0].collectDataForTest(testDispatcher)
-
-        // Verify
-        assertEquals(1, list.size)
-        assertEquals(testEntity.id, list[0].id)
-        assertEquals(testEntity.name, list[0].name)
-        assertEquals(testEntity.gender, list[0].gender)
-        assertEquals(testEntity.image, list[0].image)
-
-        collectJob.cancel()
     }
 
-    private fun createTestCharacterEntity(): CharacterEntity {
-        return CharacterEntity(
-            id = 1,
-            created = "2022-01-01T00:00:00.000Z",
-            gender = "Male",
-            image = "https://example.com/image.jpg",
-            name = "Test Character",
-            species = "Human",
-            status = "Alive",
-            type = "",
-            url = "https://example.com/character/1",
-            origin = CharacterEntity.Origin(
-                name = "Earth",
-                url = "https://example.com/location/earth"
-            ),
-            location = CharacterEntity.Location(
-                name = "Earth",
-                url = "https://example.com/location/earth"
-            ),
-            episode = listOf("https://example.com/episode/1", "https://example.com/episode/2")
-        )
+    @Test
+    fun `test getCharacter success`() = runTest {
+        val character = TestDto.testCharacterDTO1
+        val apiResult = ApiResult.Success(character)
+
+        `when`(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
+
+        val result = characterRepository.getCharacter(1)
+
+        assert(result is ApiResult.Success)
+        assert((result as ApiResult.Success).data.id == 1)
+        assert(result.data.name == "Rick Sanchez")
     }
 
+    @Test
+    fun `test getCharacter error`() = runTest {
+        val apiResult = ApiResult.Error(404, "Not Found")
+
+        `when`(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
+
+        val result = characterRepository.getCharacter(1)
+
+        assert(result is ApiResult.Error)
+        assert((result as ApiResult.Error).code == 404)
+        assert(result.message == "Not Found")
+    }
+
+    @Test
+    fun `test getCharacter exception`() = runTest {
+        val apiResult = ApiResult.Exception(Exception("Network Error"))
+
+        `when`(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
+
+        val result = characterRepository.getCharacter(1)
+
+        assert(result is ApiResult.Exception)
+        assert((result as ApiResult.Exception).e.message == "Network Error")
+    }
 }
