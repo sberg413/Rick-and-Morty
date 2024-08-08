@@ -46,7 +46,7 @@ class CharacterRemoteMediatorTest {
         ).allowMainThreadQueries().build()
         MockitoAnnotations.openMocks(this)
 
-        mediator = CharacterRemoteMediator(null, null, apiService, database)
+        mediator = CharacterRemoteMediator(apiService, database)
     }
 
     @After

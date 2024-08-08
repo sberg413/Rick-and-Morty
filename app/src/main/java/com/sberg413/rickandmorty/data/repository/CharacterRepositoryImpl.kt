@@ -7,13 +7,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.sberg413.rickandmorty.data.ApiResult
-import com.sberg413.rickandmorty.data.remote.api.CharacterService
-import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
-import com.sberg413.rickandmorty.data.local.db.AppDatabase
-import com.sberg413.rickandmorty.data.local.entity.CharacterEntity
+import com.sberg413.rickandmorty.data.local.dao.CharacterDao
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteMediator
+import com.sberg413.rickandmorty.data.toCharacter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,9 +21,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class CharacterRepositoryImpl @Inject constructor(
-    private val characterService: CharacterService,
+    private val characterRemoteMediator: CharacterRemoteMediator?,
     private val characterRemoteDataSource: CharacterRemoteDataSource,
-    private val appDatabase: AppDatabase,
+    private val characterDao: CharacterDao,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : CharacterRepository {
 
@@ -36,14 +34,12 @@ class CharacterRepositoryImpl @Inject constructor(
             config = PagingConfig(
                 pageSize = NETWORK_PAGE_SIZE
             ),
-            remoteMediator = CharacterRemoteMediator(
-                search,
-                status,
-                characterService,
-                appDatabase
-            ),
+            remoteMediator = characterRemoteMediator?.apply {
+                this.queryName = search
+                this.queryStatus = status
+            },
             pagingSourceFactory = {
-                appDatabase.characterDao().getPagingSource(search ?: "", status ?: "")
+                characterDao.getPagingSource(search ?: "", status ?: "")
             }
         )
             .flow
@@ -68,30 +64,6 @@ class CharacterRepositoryImpl @Inject constructor(
         private const val TAG = "CharacterRepositoryImpl"
         const val NETWORK_PAGE_SIZE = 20
 
-        private fun CharacterDTO.toCharacter(): Character {
-            return Character(
-                id,
-                status,
-                species,
-                type,
-                gender,
-                origin.url.split("/").last(),
-                location.url.split("/").last(),
-                image,
-                name)
-        }
 
-        private fun CharacterEntity.toCharacter(): Character {
-            return Character(
-                id,
-                status,
-                species,
-                type,
-                gender,
-                origin.url.split("/").last(),
-                location.url.split("/").last(),
-                image,
-                name)
-        }
     }
 }
