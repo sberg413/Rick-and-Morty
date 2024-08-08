@@ -1,6 +1,7 @@
 package com.sberg413.rickandmorty.data.repository
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.RemoteMediator.MediatorResult
 import androidx.paging.testing.asPagingSourceFactory
 import androidx.paging.testing.asSnapshot
 import com.sberg413.rickandmorty.MainCoroutineRule
@@ -25,8 +26,9 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
@@ -42,6 +44,7 @@ class CharacterRepositoryImplTest {
     private lateinit var characterDao: CharacterDao
 
     private lateinit var characterRepository: CharacterRepository
+
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @get:Rule
@@ -50,7 +53,7 @@ class CharacterRepositoryImplTest {
     @Before
     fun setUp() {
         characterRepository = CharacterRepositoryImpl(
-            null,
+            characterRemoteMediator,
             characterRemoteDataSource,
             characterDao,
             testDispatcher
@@ -69,12 +72,15 @@ class CharacterRepositoryImplTest {
         )
         val pagingSourceFactory = characterEntities.asPagingSourceFactory()
         val pagingSource = pagingSourceFactory()
-        `when`(characterDao.getPagingSource(anyString(), anyString())).thenReturn(pagingSource)
-        // `when`(characterRemoteMediator.load(any(LoadType::class.java), any(PagingState::class.java) as PagingState<Int,CharacterEntity>)).thenReturn(mock())
+        whenever(characterDao.getPagingSource(anyString(), anyString())).thenReturn(pagingSource)
+
+        val mockMediatorResult = MediatorResult.Success(endOfPaginationReached = true)
+        whenever(characterRemoteMediator.load(any(), any())).thenReturn(mockMediatorResult)
 
         val characterList = mutableListOf<Character>()
         val job = launch(testDispatcher) {
-            characterRepository.getCharacterList("Rick", "Alive").asSnapshot().toCollection(characterList)
+            characterRepository.getCharacterList("Rick", "Alive")
+                .asSnapshot().toCollection(characterList)
         }
         advanceUntilIdle()
 
@@ -92,7 +98,7 @@ class CharacterRepositoryImplTest {
         val character = TestDto.testCharacterDTO1
         val apiResult = ApiResult.Success(character)
 
-        `when`(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
+        whenever(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
 
         val result = characterRepository.getCharacter(1)
 
@@ -105,7 +111,7 @@ class CharacterRepositoryImplTest {
     fun `test getCharacter error`() = runTest {
         val apiResult = ApiResult.Error(404, "Not Found")
 
-        `when`(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
+        whenever(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
 
         val result = characterRepository.getCharacter(1)
 
@@ -118,7 +124,7 @@ class CharacterRepositoryImplTest {
     fun `test getCharacter exception`() = runTest {
         val apiResult = ApiResult.Exception(Exception("Network Error"))
 
-        `when`(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
+        whenever(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
 
         val result = characterRepository.getCharacter(1)
 

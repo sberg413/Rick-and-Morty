@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class CharacterRepositoryImpl @Inject constructor(
-    private val characterRemoteMediator: CharacterRemoteMediator?,
+    private val characterRemoteMediator: CharacterRemoteMediator,
     private val characterRemoteDataSource: CharacterRemoteDataSource,
     private val characterDao: CharacterDao,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -34,9 +34,9 @@ class CharacterRepositoryImpl @Inject constructor(
             config = PagingConfig(
                 pageSize = NETWORK_PAGE_SIZE
             ),
-            remoteMediator = characterRemoteMediator?.apply {
-                this.queryName = search
-                this.queryStatus = status
+            remoteMediator = characterRemoteMediator.apply {
+                queryName = search
+                queryStatus = status
             },
             pagingSourceFactory = {
                 characterDao.getPagingSource(search ?: "", status ?: "")

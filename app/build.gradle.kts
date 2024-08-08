@@ -156,6 +156,7 @@ dependencies {
     testImplementation(libs.androidx.paging.testing)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockito.kotlin)
 
 }
 

@@ -22,10 +22,13 @@ class CharacterRemoteMediator @Inject constructor(
     private val database: AppDatabase
 ) : RemoteMediator<Int, CharacterEntity>() {
 
+    var queryName: String? = null
+    var queryStatus: String? = null
+
     companion object {
         private const val TAG = "CharacterRemoteMediator"
-        private const val STARTING_PAGE_INDEX = 1
 
+        private const val STARTING_PAGE_INDEX = 1
         fun getPageNumber(url: String?): Int? {
             return if (url != null) {
                 try {
@@ -38,9 +41,6 @@ class CharacterRemoteMediator @Inject constructor(
             } else null
         }
     }
-
-    var queryName: String? = null
-    var queryStatus: String? = null
 
     override suspend fun load(
         loadType: LoadType,
@@ -76,7 +76,7 @@ class CharacterRemoteMediator @Inject constructor(
             }
         }
 
-        Log.d(TAG, "loading page $page for loadType $loadType")
+        Log.d(TAG, "loading page $page for loadType $loadType | search name: $name & status: $status" )
 
         try {
             val apiResponse = apiService.getCharacterList(page, queryName, queryStatus)
