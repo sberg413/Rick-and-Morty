@@ -17,6 +17,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -24,7 +25,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Box(
-        modifier =  modifier.fillMaxSize(),
+        modifier =  modifier.fillMaxSize().testTag("LoadingScreen"),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
