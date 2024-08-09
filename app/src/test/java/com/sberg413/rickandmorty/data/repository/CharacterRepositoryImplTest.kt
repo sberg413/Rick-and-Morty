@@ -8,6 +8,7 @@ import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestDto
 import com.sberg413.rickandmorty.TestEntity
 import com.sberg413.rickandmorty.data.ApiResult
+import com.sberg413.rickandmorty.data.local.CharacterLocalDataSource
 import com.sberg413.rickandmorty.data.local.dao.CharacterDao
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
@@ -43,6 +44,9 @@ class CharacterRepositoryImplTest {
     @Mock
     private lateinit var characterDao: CharacterDao
 
+    @Mock
+    private lateinit var characterLocalDataSource: CharacterLocalDataSource
+
     private lateinit var characterRepository: CharacterRepository
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -56,6 +60,7 @@ class CharacterRepositoryImplTest {
             characterRemoteMediator,
             characterRemoteDataSource,
             characterDao,
+            characterLocalDataSource,
             testDispatcher
         )
     }

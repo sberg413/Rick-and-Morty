@@ -2,6 +2,7 @@ package com.sberg413.rickandmorty.ui.detail
 
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -35,18 +35,17 @@ import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.ui.LoadingScreen
 import com.sberg413.rickandmorty.utils.findActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-fun CharacterDetailDescription() {
+fun CharacterDetailDescription(viewModel: DetailViewModel = viewModel()) {
 
-    val viewModel: DetailViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsState()
 
     when (uiState) {
         is CharacterDetailUiState.Loading -> {
             LoadingScreen()
-
         }
 
         is CharacterDetailUiState.Success -> {
@@ -172,9 +171,10 @@ private fun CharacterDetailContentPreview() {
     }
 }
 
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun CharacterImage(url: String, name: String) {
+fun CharacterImage(url: String, name: String) {
     Box(Modifier.fillMaxWidth()) {
         GlideImage(
             model = url,

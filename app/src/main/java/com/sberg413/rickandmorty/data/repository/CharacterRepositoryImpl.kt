@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.sberg413.rickandmorty.data.ApiResult
+import com.sberg413.rickandmorty.data.local.CharacterLocalDataSource
 import com.sberg413.rickandmorty.data.local.dao.CharacterDao
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.remote.CharacterRemoteDataSource
@@ -24,6 +25,7 @@ class CharacterRepositoryImpl @Inject constructor(
     private val characterRemoteMediator: CharacterRemoteMediator,
     private val characterRemoteDataSource: CharacterRemoteDataSource,
     private val characterDao: CharacterDao,
+    private val characterLocalDataSource: CharacterLocalDataSource,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : CharacterRepository {
 
@@ -52,13 +54,14 @@ class CharacterRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getCharacter(id: Int): ApiResult<Character> = withContext(dispatcher) {
-        return@withContext when (val response =  characterRemoteDataSource.invoke(id)) {
+        return@withContext characterLocalDataSource.invoke(id)?.let {
+            ApiResult.Success(it.toCharacter())
+        } ?: when (val response =  characterRemoteDataSource.invoke(id)) {
             is ApiResult.Success -> ApiResult.Success(response.data.toCharacter())
             is ApiResult.Error -> ApiResult.Error(response.code, response.message)
             is ApiResult.Exception -> ApiResult.Exception(response.e)
         }
     }
-
 
     companion object {
         private const val TAG = "CharacterRepositoryImpl"

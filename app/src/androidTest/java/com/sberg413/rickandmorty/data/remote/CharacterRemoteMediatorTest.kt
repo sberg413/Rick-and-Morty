@@ -7,6 +7,8 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.MediumTest
 import com.sberg413.rickandmorty.TestDto
 import com.sberg413.rickandmorty.data.local.db.AppDatabase
 import com.sberg413.rickandmorty.data.remote.api.CharacterService
@@ -19,6 +21,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -26,6 +29,8 @@ import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
 
+@RunWith(AndroidJUnit4::class)
+@MediumTest
 @OptIn(ExperimentalPagingApi::class)
 class CharacterRemoteMediatorTest {
 
