@@ -23,6 +23,11 @@ This project demonstrates several development best practices, modern Android lib
 - **Jacoco Code Coverage**: Measures and reports test coverage to help identify untested parts of the codebase.
 - **CI/CD Workflows**: Utilizes GitHub Actions to run tests, lint checks, and code coverage on all PRs.
 
+## Screenshots
+
+![Main Screen Light Theme](images/main_light.png) ![Detail Screen Light Theme](images/detail_light.png) ![Main Screen Dark Theme](images/main_dark.png) ![Detail Screen Dark Theme](images/detail_dark.png)
+
+
 ## Getting Started
 
 To run this project locally, follow these steps:

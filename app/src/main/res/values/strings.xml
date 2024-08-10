@@ -9,7 +9,7 @@
     <string name="status_filter">Status Filter</string>
     <string name="retry">Retry</string>
     <string name="no_results">No Results Found!</string>
-    <string name="search_hint">Character Name</string>
+    <string name="search_hint">Filter by Name</string>
     <string name="character_img_content_description">Image of %s</string>
 
     <array name="filter_options">
