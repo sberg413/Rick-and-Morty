@@ -1,5 +1,6 @@
 package com.sberg413.rickandmorty.data.remote
 
+import com.sberg413.rickandmorty.TestDto
 import com.sberg413.rickandmorty.data.ApiResult
 import com.sberg413.rickandmorty.data.remote.api.CharacterService
 import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
@@ -33,7 +34,7 @@ class CharacterRemoteDataSourceTest {
     @Test
     fun `invoke returns character on success`() = runTest {
         val characterId = 1
-        val character = Mockito.mock(CharacterDTO::class.java)
+        val character = TestDto.testCharacterDTO1
 
         Mockito.`when`(characterService.getCharacter(characterId))
             .thenReturn(Response.success(character))
@@ -42,7 +43,9 @@ class CharacterRemoteDataSourceTest {
 
         assert(result is ApiResult.Success)
         result as ApiResult.Success
-        assertEquals(character, result.data)
+        assertEquals(character.id, result.data.id)
+        assertEquals(character.name, result.data.name)
+        assertEquals(character.status, result.data.status)
     }
 
     @Test
