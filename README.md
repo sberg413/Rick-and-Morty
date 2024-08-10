@@ -25,7 +25,9 @@ This project demonstrates several development best practices, modern Android lib
 
 ## Screenshots
 
-![Main Screen Light Theme](screenshots/main_light.png) ![Detail Screen Light Theme](screenshots/detail_light.png) ![Main Screen Dark Theme](screenshots/main_dark.png) ![Detail Screen Dark Theme](screenshots/detail_dark.png)
+  ![Main Screen Light Theme](screenshots/main_light.png "Main Light")  ![Detail Screen Light Theme](screenshots/detail_light.png "Detail Light") 
+
+  ![Main Screen Dark Theme](screenshots/main_dark.png "Main Dark")  ![Detail Screen Dark Theme](screenshots/detail_dark.png "Detail Dark")
 
 
 ## Getting Started
