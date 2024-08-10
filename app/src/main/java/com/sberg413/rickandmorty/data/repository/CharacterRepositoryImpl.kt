@@ -56,11 +56,7 @@ class CharacterRepositoryImpl @Inject constructor(
     override suspend fun getCharacter(id: Int): ApiResult<Character> = withContext(dispatcher) {
         return@withContext characterLocalDataSource.invoke(id)?.let {
             ApiResult.Success(it.toCharacter())
-        } ?: when (val response =  characterRemoteDataSource.invoke(id)) {
-            is ApiResult.Success -> ApiResult.Success(response.data.toCharacter())
-            is ApiResult.Error -> ApiResult.Error(response.code, response.message)
-            is ApiResult.Exception -> ApiResult.Exception(response.e)
-        }
+        } ?: characterRemoteDataSource.invoke(id)
     }
 
     companion object {

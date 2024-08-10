@@ -4,17 +4,17 @@ import com.sberg413.rickandmorty.data.local.entity.CharacterEntity
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.remote.dto.CharacterDTO
 
-fun CharacterDTO.toCharacter(): Character {
+fun mapCharacterDtoToCharacter(characterDTO: CharacterDTO): Character {
     return Character(
-        id,
-        status,
-        species,
-        type,
-        gender,
-        origin.url.split("/").last(),
-        location.url.split("/").last(),
-        image,
-        name)
+        characterDTO.id,
+        characterDTO.status,
+        characterDTO.species,
+        characterDTO.type,
+        characterDTO.gender,
+        characterDTO.origin.url.split("/").last(),
+        characterDTO.location.url.split("/").last(),
+        characterDTO.image,
+        characterDTO.name)
 }
 
 fun CharacterEntity.toCharacter(): Character {

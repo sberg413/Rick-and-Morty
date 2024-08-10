@@ -5,6 +5,7 @@ import androidx.paging.RemoteMediator.MediatorResult
 import androidx.paging.testing.asPagingSourceFactory
 import androidx.paging.testing.asSnapshot
 import com.sberg413.rickandmorty.MainCoroutineRule
+import com.sberg413.rickandmorty.TestData
 import com.sberg413.rickandmorty.TestDto
 import com.sberg413.rickandmorty.TestEntity
 import com.sberg413.rickandmorty.data.ApiResult
@@ -100,7 +101,7 @@ class CharacterRepositoryImplTest {
 
     @Test
     fun `test getCharacter success`() = runTest {
-        val character = TestDto.testCharacterDTO1
+        val character = TestData.TEST_CHARACTER
         val apiResult = ApiResult.Success(character)
 
         whenever(characterRemoteDataSource.invoke(anyInt())).thenReturn(apiResult)
@@ -108,8 +109,10 @@ class CharacterRepositoryImplTest {
         val result = characterRepository.getCharacter(1)
 
         assert(result is ApiResult.Success)
-        assert((result as ApiResult.Success).data.id == 1)
-        assert(result.data.name == "Rick Sanchez")
+        result as ApiResult.Success
+        assertEquals(character.id, result.data.id)
+        assertEquals(character.name, result.data.name)
+        assertEquals(character.status, result.data.status)
     }
 
     @Test
