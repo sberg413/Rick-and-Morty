@@ -10,7 +10,7 @@ tasks.withType(Test).configureEach {
 }
 
 tasks.register('jacocoTestReport', JacocoReport) {
-    dependsOn 'testDebugUnitTest', 'createDebugCoverageReport' // 'connectedDebugAndroidTest' //  'createDebugCoverageReport'
+    // dependsOn 'testDebugUnitTest', 'createDebugCoverageReport' // 'connectedDebugAndroidTest' //  'createDebugCoverageReport'
 
     def fileFilter = [
             '**/R.class',
