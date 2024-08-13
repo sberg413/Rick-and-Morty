@@ -150,6 +150,7 @@ dependencies {
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.androidx.fragment.testing)
     testImplementation(libs.androidx.junit)
+    testImplementation(libs.androidx.test.runner)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
     testImplementation(libs.robolectric)
