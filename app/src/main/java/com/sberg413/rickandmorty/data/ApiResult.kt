@@ -24,6 +24,7 @@ sealed class ApiResult<out T> {
  * @throws ClassCastException If the default no-op mapper is used and the types {@code T} and {@code R}
  *                            are not compatible.
  */
+@Suppress("UNCHECKED_CAST")
 suspend fun <T: Any, R: Any> handleApiResponse(
     mapper: (T) -> R = { it as R }, // Default no mapping
     execute: suspend () -> Response<T>
