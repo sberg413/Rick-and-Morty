@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -30,12 +31,16 @@ data class MainUiState(
     val isLoading: Boolean = false,
     val currentCharacter: Character? = null,
     val characterFilter: CharacterFilter = CharacterFilter(NoStatusFilter, NoSearchFilter),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val listData: PagingData<Character> = PagingData.empty()
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MainViewModel @Inject constructor(private val characterRepository: CharacterRepository): ViewModel() {
+
+    private val _uiState = MutableStateFlow(MainUiState())
+    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     val characterClicked: StateFlow<Character?> get() = _characterClicked
     private val _characterClicked = MutableStateFlow<Character?>(null)
@@ -76,7 +81,7 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
         }
     }
 
-    fun getSelectedStatusIndex(options: Array<String>): Int {
+    fun getSelectedStatusIndex(options: List<String>): Int {
         return _characterFilterFlow.value.statusFilter.status?.let {
             options.indexOf(it)
         } ?: -1

@@ -39,7 +39,7 @@ class StatusMenuProvider(private val mainViewModel: MainViewModel): MenuProvider
             }
             setSelection(
                 mainViewModel.getSelectedStatusIndex(
-                    resources.getStringArray(R.array.filter_options)
+                    resources.getStringArray(R.array.filter_options).asList()
                 )
             )
         }

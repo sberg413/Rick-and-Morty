@@ -12,9 +12,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,12 +44,47 @@ import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.ui.LoadingScreen
 import com.sberg413.rickandmorty.utils.findActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CharacterDetailDescription(viewModel: DetailViewModel = viewModel()) {
+fun CharacterDetailScreen(viewModel: DetailViewModel = viewModel(), navController: NavController) {
 
     val uiState by viewModel.uiState.collectAsState()
+
+    val title = if (uiState is CharacterDetailUiState.Success) {
+        (uiState as CharacterDetailUiState.Success).character.name
+    } else {
+        "Loading Character Details ..."
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                colors = getTopAppColors(),
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp()}) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+            )
+        }
+    ) { innerPadding ->
+
+        CharacterDetailContent(
+            modifier = Modifier.padding(innerPadding),
+            uiState = uiState
+        )
+    }
+
+
+}
+
+@Composable
+fun CharacterDetailContent(modifier: Modifier = Modifier, uiState: CharacterDetailUiState) {
 
     when (uiState) {
         is CharacterDetailUiState.Loading -> {
@@ -49,8 +92,8 @@ fun CharacterDetailDescription(viewModel: DetailViewModel = viewModel()) {
         }
 
         is CharacterDetailUiState.Success -> {
-            val character = (uiState as CharacterDetailUiState.Success).character
-            val location = (uiState as CharacterDetailUiState.Success).location
+            val character = uiState.character
+            val location = uiState.location
 
             val context = LocalContext.current.findActivity()
             LaunchedEffect(Unit) {
@@ -58,21 +101,22 @@ fun CharacterDetailDescription(viewModel: DetailViewModel = viewModel()) {
             }
 
             CharacterDetailContent(
+                modifier = modifier,
                 characterData = character,
                 locationData = location
             )
         }
 
         is CharacterDetailUiState.Error -> {
-            ShowErrorStateToast((uiState as CharacterDetailUiState.Error).message)
+            ShowErrorStateToast(uiState.message)
         }
     }
 }
 
 @Composable
-fun CharacterDetailContent(characterData: Character, locationData: Location?) {
+fun CharacterDetailContent(modifier: Modifier = Modifier, characterData: Character, locationData: Location?) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         color = MaterialTheme.colorScheme.background
@@ -167,7 +211,7 @@ private fun CharacterDetailContentPreview() {
 
     )
     MaterialTheme {
-        CharacterDetailContent(character, location)
+        CharacterDetailContent(characterData = character, locationData = location)
     }
 }
 

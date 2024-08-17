@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainFragment : Fragment() {
 
-    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,7 +35,7 @@ class MainFragment : Fragment() {
             )
             setContent{
                 AppTheme {
-                    MainCharacterListScreen(viewModel = mainViewModel)
+                    MainCharacterListScreen(navController =  findNavController())
                 }
             }
         }
@@ -46,24 +45,11 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated")
-        requireActivity().addMenuProvider(
-            StatusMenuProvider(mainViewModel),
-            viewLifecycleOwner,
-            Lifecycle.State.STARTED
-        )
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.characterClicked
-                    .filterNotNull()
-                    .collect {
-                        val action = MainFragmentDirections.actionShowDetailFragment(it.id)
-                        Log.d(TAG, "characterClicked: $it | action: $action")
-                        findNavController().navigate(action)
-                        mainViewModel.updateStateWithCharacterClicked(null)
-                }
-            }
-        }
+//        requireActivity().addMenuProvider(
+//            StatusMenuProvider(mainViewModel),
+//            viewLifecycleOwner,
+//            Lifecycle.State.STARTED
+//        )
     }
 
 
