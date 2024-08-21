@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.glide.compose)
     implementation(libs.androidx.legacy.support.v4)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
     ksp(libs.glide.compiler)
 
     implementation(libs.hilt.android)
@@ -135,6 +136,7 @@ dependencies {
     androidTestImplementation(project(":shared-test"))
     androidTestImplementation(libs.androidx.core)
     androidTestImplementation(libs.androidx.fragment.testing)
+    androidTestImplementation(libs.androidx.navigation.testing)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.junit.ktx)

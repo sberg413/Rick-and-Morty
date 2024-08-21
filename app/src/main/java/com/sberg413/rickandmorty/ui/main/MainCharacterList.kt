@@ -1,6 +1,5 @@
 package com.sberg413.rickandmorty.ui.main
 
-import android.graphics.drawable.Icon
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -29,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,16 +34,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -59,14 +54,19 @@ import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import kotlinx.coroutines.flow.filterNotNull
-import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.map
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainCharacterListScreen(viewModel: MainViewModel = viewModel(), navController: NavController) {
 
-    val characters = viewModel.listData.collectAsLazyPagingItems()
+    val uiState by viewModel.uiState.collectAsState()
+
+    val characters = viewModel.uiState.map {
+        it.listData
+    }.collectAsLazyPagingItems()
+
     val (textState, setTextState) = rememberSaveable { mutableStateOf("") }
     val onSearch: (String) -> Unit = {
         viewModel.setSearchFilter(it)
@@ -96,8 +96,11 @@ fun MainCharacterListScreen(viewModel: MainViewModel = viewModel(), navControlle
                 title = { Text(stringResource(id = R.string.app_name)) },
                 colors = getTopAppColors(),
                 actions = {
-                    StatusDropdownMenu(mainViewModel = viewModel, options = stringArrayResource(id = R.array.filter_options).asList())
-
+                    StatusDropdownMenu(
+                        options = stringArrayResource(id = R.array.filter_options).asList(),
+                        selectedOption = uiState.characterFilter.statusFilter.status,
+                        onSelection = { viewModel.setStatusFilter(it) }
+                    )
                 }
             )
 
@@ -119,12 +122,11 @@ fun MainCharacterListScreen(viewModel: MainViewModel = viewModel(), navControlle
 
 @Composable
 fun StatusDropdownMenu(
-    mainViewModel: MainViewModel,
-    options: List<String>
+    options: List<String>,
+    selectedOption: String?,
+    onSelection: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedOptionIndex = mainViewModel.getSelectedStatusIndex(options)
-    // val selectedOption = options[selectedOptionIndex]
 
     IconButton(onClick = { expanded = !expanded }) {
         Icon(
@@ -136,7 +138,7 @@ fun StatusDropdownMenu(
                 DropdownMenuItem(
                     text = { Text(text = option) },
                     trailingIcon = {
-                       if (selectedOptionIndex == i) {
+                       if (selectedOption == option || (selectedOption == null && i == 0 )) {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = "Selected"
@@ -146,7 +148,7 @@ fun StatusDropdownMenu(
                     onClick = {
                         expanded = false
                         Log.d("StatusDropdownMenu", "Status selected: $option")
-                        mainViewModel.setStatusFilter(option)
+                        onSelection(option)
                     })
             }
 

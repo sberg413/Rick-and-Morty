@@ -4,7 +4,6 @@ import androidx.paging.PagingData
 import app.cash.turbine.test
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.TestData.TEST_CHARACTER
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.repository.CharacterRepository
 import com.sberg413.rickandmorty.ui.CharacterFilter
@@ -16,8 +15,10 @@ import com.sberg413.rickandmorty.util.collectDataForTest
 import junit.framework.TestCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -38,7 +39,7 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class MainViewModelTest : TestCase() {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     @get:Rule
     val coroutineRule = MainCoroutineRule(testDispatcher)
@@ -89,10 +90,10 @@ class MainViewModelTest : TestCase() {
 
         val values = mutableListOf<PagingData<Character>>()
         val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.listData.toList(values)
+            viewModel.uiState.map { it.listData  }.toList(values)
         }
 
-        assertEquals(characterList, values[1].collectDataForTest(testDispatcher))
+        assertEquals(characterList, values[0].collectDataForTest(testDispatcher))
         verify(characterRepository, times(1)).getCharacterList("","")
 
         collectJob.cancel()
@@ -103,11 +104,11 @@ class MainViewModelTest : TestCase() {
 
         val values = mutableListOf<PagingData<Character>>()
         val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.listData.toList(values)
+            viewModel.uiState.map { it.listData }.toList(values)
         }
         viewModel.setSearchFilter(SEARCH_MORTY)
 
-        assertEquals(characterList, values[2].collectDataForTest(testDispatcher))
+        assertEquals(characterList, values[0].collectDataForTest(testDispatcher))
         verify(characterRepository, times(1)).getCharacterList(SEARCH_MORTY,"")
 
         collectJob.cancel()
@@ -118,11 +119,11 @@ class MainViewModelTest : TestCase() {
 
         val values = mutableListOf<PagingData<Character>>()
         val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.listData.toList(values)
+            viewModel.uiState.map { it.listData }.toList(values)
         }
         viewModel.setStatusFilter(STATUS_ALIVE)
 
-        assertEquals(characterList, values[2].collectDataForTest(testDispatcher))
+        assertEquals(characterList, values[0].collectDataForTest(testDispatcher))
         verify(characterRepository, times(1)).getCharacterList("", STATUS_ALIVE)
 
         collectJob.cancel()
@@ -134,9 +135,9 @@ class MainViewModelTest : TestCase() {
         viewModel.characterClicked.test {
             assertEquals(null, awaitItem()) // Initial value is null
 
-            viewModel.updateStateWithCharacterClicked(TEST_CHARACTER)
+            viewModel.updateStateWithCharacterClicked(TestData.TEST_CHARACTER)
 
-            assertEquals(TEST_CHARACTER, awaitItem())
+            assertEquals(TestData.TEST_CHARACTER, awaitItem())
 
             cancelAndIgnoreRemainingEvents()
         }

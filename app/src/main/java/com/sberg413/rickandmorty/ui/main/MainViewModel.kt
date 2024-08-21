@@ -15,14 +15,13 @@ import com.sberg413.rickandmorty.ui.SearchFilter
 import com.sberg413.rickandmorty.ui.StatusFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,7 +33,6 @@ data class MainUiState(
     val errorMessage: String? = null,
     val listData: PagingData<Character> = PagingData.empty()
 )
-
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MainViewModel @Inject constructor(private val characterRepository: CharacterRepository): ViewModel() {
@@ -48,16 +46,30 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val _characterFilterFlow =  MutableStateFlow(CharacterFilter(NoStatusFilter, NoSearchFilter))
 
-    val listData: Flow<PagingData<Character>> = _characterFilterFlow
-        .flatMapLatest {
-            Log.d(TAG, "Fetching character list with filter: $it")
-            characterRepository.getCharacterList(it.searchFilter.search ?: "", it.statusFilter.status ?: "")
-                .catch { e ->
-                    Log.e(TAG, "Error fetching character list,", e)
+    init {
+        viewModelScope.launch {
+            _characterFilterFlow.flatMapLatest {
+                Log.d(TAG, "Fetching character list with filter: $it")
+                characterRepository.getCharacterList(
+                    it.searchFilter.search ?: "",
+                    it.statusFilter.status ?: ""
+                )
+                    .catch { e ->
+                        Log.e(TAG, "Error fetching character list,", e)
+                        emit(PagingData.empty())
+                    }
+            }
+            .cachedIn(viewModelScope)
+            .collectLatest { listData ->
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        characterFilter = _characterFilterFlow.value,
+                        listData = listData
+                    )
                 }
+            }
         }
-        .cachedIn(viewModelScope)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PagingData.empty())
+    }
 
     fun setStatusFilter(status: String) {
         viewModelScope.launch {
@@ -92,3 +104,4 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
     }
 
 }
+
