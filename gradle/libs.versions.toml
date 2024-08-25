@@ -1,19 +1,19 @@
 [versions]
 agp = "8.5.2"
-activityKtx = "1.9.0"
+activityKtx = "1.9.1"
 appcompat = "1.7.0"
-composeBom = "2024.06.00"
+composeBom = "2024.08.00"
 constraintlayout = "2.1.4"
-core = "1.5.0"
-coreKtx = "1.13.1"
-coreTesting = "2.2.0"
+androidxCore = "1.6.1"
+androidxCoreKtx = "1.13.1"
+androidxCoreTesting = "2.2.0"
 coroutine = "1.8.0"
-fragmentVersion = "1.8.0"
+fragmentVersion = "1.8.2"
 glide = "4.16.0"
 glideCompose = "1.0.0-beta01"
 hilt  = "2.51.1"
 junit = "4.13.2"
-junitKtx = "1.1.5"
+junitKtx = "1.2.1"
 kotlin = "1.9.23"
 ksp = "1.9.23-1.0.20"
 kotlinCompilerExt = "1.5.13" # don't remove!
@@ -23,18 +23,19 @@ material = "1.12.0"
 mockitoAndroid = "5.12.0"
 mockitoCore = "5.6.0"
 mockitoInline = "5.2.0"
-lifecycle = "2.8.2"
+lifecycle = "2.8.4"
 mockitoKotlin = "5.4.0"
 navigationVersion = "2.7.7"
 paging = "3.2.1"
 retrofit = "2.9.0"
 robolectric = "4.12.1"
 room = "2.6.1"
-runner = "1.5.2"
+runner = "1.6.2"
 swiperefreshlayout = "1.1.0"
 benchmarkCommon = "1.2.4"
 turbine = "1.1.0"
 uiTextGoogleFonts = "1.6.8"
+lifecycleRuntimeComposeAndroid = "2.8.4"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityKtx" }
@@ -42,9 +43,9 @@ androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-core = { module = "androidx.test:core", version.ref = "core" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
-androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+androidx-core = { module = "androidx.test:core", version.ref = "androidxCore" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "androidxCoreTesting" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentVersion" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragmentVersion" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junitKtx" }
@@ -64,7 +65,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
-androidx-test-rules = { module = "androidx.test:rules", version.ref = "core" }
+androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidxCore" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "runner" }
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
@@ -74,7 +75,8 @@ androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
-glide-compiler = { module = "com.github.bumptech.glide:ksp", version.ref = "glide" }
+glide-compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
+glide-ksp = { module = "com.github.bumptech.glide:ksp", version.ref = "glide" }
 glide-compose = { module = "com.github.bumptech.glide:compose", version.ref = "glideCompose" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
@@ -92,6 +94,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-benchmark-common = { group = "androidx.benchmark", name = "benchmark-common", version.ref = "benchmarkCommon" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android", version.ref = "lifecycleRuntimeComposeAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
