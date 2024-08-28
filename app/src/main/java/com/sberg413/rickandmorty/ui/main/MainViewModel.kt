@@ -15,24 +15,25 @@ import com.sberg413.rickandmorty.ui.SearchFilter
 import com.sberg413.rickandmorty.ui.StatusFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 data class MainUiState(
-    val isLoading: Boolean = false,
-    val currentCharacter: Character? = null,
-    val characterFilter: CharacterFilter = CharacterFilter(NoStatusFilter, NoSearchFilter),
-    val errorMessage: String? = null,
-    val listData: PagingData<Character> = PagingData.empty()
+    val statusFilter: StatusFilter = NoStatusFilter,
+    val searchFilter: SearchFilter = NoSearchFilter
 )
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MainViewModel @Inject constructor(private val characterRepository: CharacterRepository): ViewModel() {
@@ -46,36 +47,34 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val _characterFilterFlow =  MutableStateFlow(CharacterFilter(NoStatusFilter, NoSearchFilter))
 
-    init {
-        viewModelScope.launch {
-            _characterFilterFlow.flatMapLatest {
-                Log.d(TAG, "Fetching character list with filter: $it")
-                characterRepository.getCharacterList(
-                    it.searchFilter.search ?: "",
-                    it.statusFilter.status ?: ""
+    val listData: Flow<PagingData<Character>> = _characterFilterFlow
+        .flatMapLatest {
+            Log.d(TAG, "Fetching character list with filter: $it")
+            _uiState.update { state ->
+                state.copy(
+                    statusFilter = it.statusFilter,
+                    searchFilter = it.searchFilter
                 )
-                    .catch { e ->
-                        Log.e(TAG, "Error fetching character list,", e)
-                        emit(PagingData.empty())
-                    }
             }
-            .cachedIn(viewModelScope)
-            .collectLatest { listData ->
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        characterFilter = _characterFilterFlow.value,
-                        listData = listData
-                    )
+            characterRepository.getCharacterList(it.searchFilter.search ?: "", it.statusFilter.status ?: "")
+                .catch { e ->
+                    Log.e(TAG, "Error fetching character list,", e)
                 }
-            }
         }
-    }
+        .cachedIn(viewModelScope)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            PagingData.empty()
+        )
 
     fun setStatusFilter(status: String) {
         viewModelScope.launch {
             val value = if (status.endsWith("all", true))
                 NoStatusFilter else StatusFilter(status)
-            _characterFilterFlow.value = _characterFilterFlow.value.copy(statusFilter = value)
+            _characterFilterFlow.update {
+                it.copy(statusFilter = value)
+            }
         }
     }
 
@@ -83,7 +82,9 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
         viewModelScope.launch {
             val value = if (search.isNullOrBlank())
                 NoSearchFilter else SearchFilter(search)
-            _characterFilterFlow.value = _characterFilterFlow.value.copy(searchFilter = value)
+            _characterFilterFlow.update {
+                it.copy(searchFilter = value)
+            }
         }
     }
 
@@ -91,12 +92,6 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
         viewModelScope.launch {
             _characterClicked.value = character
         }
-    }
-
-    fun getSelectedStatusIndex(options: List<String>): Int {
-        return _characterFilterFlow.value.statusFilter.status?.let {
-            options.indexOf(it)
-        } ?: -1
     }
 
     companion object {

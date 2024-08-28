@@ -62,10 +62,7 @@ import kotlinx.coroutines.flow.map
 fun MainCharacterListScreen(viewModel: MainViewModel = viewModel(), navController: NavController) {
 
     val uiState by viewModel.uiState.collectAsState()
-
-    val characters = viewModel.uiState.map {
-        it.listData
-    }.collectAsLazyPagingItems()
+    val characters = viewModel.listData.collectAsLazyPagingItems()
 
     val (textState, setTextState) = rememberSaveable { mutableStateOf("") }
     val onSearch: (String) -> Unit = {
@@ -98,7 +95,7 @@ fun MainCharacterListScreen(viewModel: MainViewModel = viewModel(), navControlle
                 actions = {
                     StatusDropdownMenu(
                         options = stringArrayResource(id = R.array.filter_options).asList(),
-                        selectedOption = uiState.characterFilter.statusFilter.status,
+                        selectedOption = uiState.statusFilter.status,
                         onSelection = { viewModel.setStatusFilter(it) }
                     )
                 }
