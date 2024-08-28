@@ -9,6 +9,7 @@ import com.sberg413.rickandmorty.data.remote.api.LocationService
 import com.sberg413.rickandmorty.data.local.db.AppDatabase
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -47,7 +48,9 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun providesMoshi(): Moshi = Moshi.Builder().build()
+    fun providesMoshi(): Moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
 
 
     @Provides
@@ -56,7 +59,7 @@ class AppModule {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(MoshiConverterFactory.create(moshi).asLenient())
             .build()
 
     @Provides
