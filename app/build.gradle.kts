@@ -28,7 +28,9 @@ android {
         debug {
             // applicationIdSuffix = ".debug"
             isMinifyEnabled = false
-            // enableUnitTestCoverage = true
+            isShrinkResources = false
+            // isTestCoverageEnabled = true
+            enableUnitTestCoverage = true
             enableAndroidTestCoverage= true
         }
         release {
