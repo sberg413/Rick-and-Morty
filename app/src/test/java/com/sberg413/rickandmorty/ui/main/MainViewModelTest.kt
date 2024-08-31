@@ -4,14 +4,8 @@ import androidx.paging.PagingData
 import app.cash.turbine.test
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.TestData.TEST_CHARACTER
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.repository.CharacterRepository
-import com.sberg413.rickandmorty.ui.CharacterFilter
-import com.sberg413.rickandmorty.ui.NoSearchFilter
-import com.sberg413.rickandmorty.ui.NoStatusFilter
-import com.sberg413.rickandmorty.ui.SearchFilter
-import com.sberg413.rickandmorty.ui.StatusFilter
 import com.sberg413.rickandmorty.util.collectDataForTest
 import junit.framework.TestCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -66,22 +60,28 @@ class MainViewModelTest : TestCase() {
 
     @Test
     fun `setStatusFilter updates filter correctly`() = runTest {
-        val expectedFilter = CharacterFilter(StatusFilter("Alive"), NoSearchFilter)
+        val expectedFilter = "Alive"
 
-        viewModel.setStatusFilter("Alive")
+        Assert.assertEquals(null, viewModel.uiState.value.statusFilter.status)
+
+        viewModel.setStatusFilter(expectedFilter)
+
         advanceUntilIdle()
 
-        Assert.assertEquals(expectedFilter, viewModel._characterFilterFlow.value)
+        Assert.assertEquals(expectedFilter, viewModel.uiState.value.statusFilter.status)
+
     }
 
     @Test
     fun `setSearchFilter updates filter correctly`() = runTest {
-        val expectedFilter = CharacterFilter(NoStatusFilter, SearchFilter("Rick"))
+        val expectedFilter = "Rick"
 
-        viewModel.setSearchFilter("Rick")
+        Assert.assertEquals(null, viewModel.uiState.value.searchFilter.search)
+
+        viewModel.setSearchFilter(expectedFilter)
         advanceUntilIdle()
 
-        Assert.assertEquals(expectedFilter, viewModel._characterFilterFlow.value)
+        Assert.assertEquals(expectedFilter, viewModel.uiState.value.searchFilter.search)
     }
 
     @Test
@@ -134,9 +134,9 @@ class MainViewModelTest : TestCase() {
         viewModel.characterClicked.test {
             assertEquals(null, awaitItem()) // Initial value is null
 
-            viewModel.updateStateWithCharacterClicked(TEST_CHARACTER)
+            viewModel.updateStateWithCharacterClicked(TestData.TEST_CHARACTER)
 
-            assertEquals(TEST_CHARACTER, awaitItem())
+            assertEquals(TestData.TEST_CHARACTER, awaitItem())
 
             cancelAndIgnoreRemainingEvents()
         }

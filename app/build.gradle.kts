@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.glide.compose)
     implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
+    implementation(libs.androidx.navigation.compose)
     ksp(libs.glide.ksp)
     annotationProcessor(libs.glide.compiler)
 
