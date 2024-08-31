@@ -49,6 +49,11 @@ tasks.register('jacocoTestReport', JacocoReport) {
             'build/outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec'
         ]))
 
+    // Exclude methods named "Preview*" from the Jacoco report
+    classDirectories = classDirectories.asFileTree.matching {
+        exclude '**/*$Preview*' // Excludes methods containing "Preview"
+    }
+
     reports {
         xml.required = true
         html.required = true
