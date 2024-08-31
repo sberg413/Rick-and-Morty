@@ -7,20 +7,12 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import com.sberg413.rickandmorty.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DetailFragment : Fragment() {
-
-//    private val detailViewModel: DetailViewModel by viewModels()
-
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        arguments?.getParcelable<Character>(DetailViewModel.KEY_CHARACTER)?.let {
-//            (requireActivity() as AppCompatActivity).supportActionBar?.title = it.name
-//        }
-//    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,7 +25,7 @@ class DetailFragment : Fragment() {
             )
             setContent{
                 AppTheme {
-                    CharacterDetailDescription()
+                    CharacterDetailScreen(navController = findNavController())
                 }
             }
         }

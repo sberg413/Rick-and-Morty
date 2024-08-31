@@ -2,7 +2,9 @@ package com.sberg413.rickandmorty.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -239,6 +241,18 @@ private val highContrastDarkColorScheme = darkColorScheme(
     surfaceContainerHigh = surfaceContainerHighDarkHighContrast,
     surfaceContainerHighest = surfaceContainerHighestDarkHighContrast,
 )
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun getTopAppColors() : TopAppBarColors {
+    return TopAppBarColors(
+        containerColor = MaterialTheme.colorScheme.primary,
+        scrolledContainerColor = MaterialTheme.colorScheme.onSecondary,
+        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+        actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+    )
+}
 
 @Immutable
 data class ColorFamily(

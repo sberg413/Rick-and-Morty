@@ -3,12 +3,11 @@ package com.sberg413.rickandmorty.ui.detail
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sberg413.rickandmorty.TestData
 import com.sberg413.rickandmorty.ui.theme.AppTheme
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -30,6 +29,9 @@ class DetailRobolectricTest {
     @Mock
     private lateinit var viewModel: DetailViewModel
 
+    @Mock
+    private lateinit var navController: NavController
+
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
@@ -49,7 +51,7 @@ class DetailRobolectricTest {
         )
 
         composeTestRule.setContent {
-            CharacterDetailDescription(viewModel = viewModel)
+            CharacterDetailScreen(viewModel = viewModel, navController = navController)
         }
 
         composeTestRule.onNodeWithTag("CharacterName").assertExists()
@@ -64,7 +66,7 @@ class DetailRobolectricTest {
 
         composeTestRule.setContent {
             AppTheme {
-                CharacterDetailDescription(viewModel = viewModel)
+                CharacterDetailScreen(viewModel = viewModel, navController = navController)
             }
         }
 
@@ -79,7 +81,7 @@ class DetailRobolectricTest {
 
         composeTestRule.setContent {
             AppTheme {
-                CharacterDetailDescription(viewModel = viewModel)
+                CharacterDetailScreen(viewModel = viewModel, navController = navController)
             }
         }
 
@@ -95,7 +97,7 @@ class DetailRobolectricTest {
 
         composeTestRule.setContent {
             AppTheme {
-                CharacterDetailDescription(viewModel = viewModel)
+                CharacterDetailScreen(viewModel = viewModel, navController = navController)
             }
         }
 

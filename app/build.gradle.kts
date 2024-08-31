@@ -93,6 +93,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.glide)
     implementation(libs.glide.compose)
+    implementation(libs.androidx.legacy.support.v4)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
+    implementation(libs.androidx.navigation.compose)
     ksp(libs.glide.ksp)
     annotationProcessor(libs.glide.compiler)
 
@@ -138,6 +141,7 @@ dependencies {
     androidTestImplementation(project(":shared-test"))
     androidTestImplementation(libs.androidx.core)
     androidTestImplementation(libs.androidx.fragment.testing)
+    androidTestImplementation(libs.androidx.navigation.testing)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.junit.ktx)

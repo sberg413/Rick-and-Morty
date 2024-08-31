@@ -11,24 +11,40 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -36,12 +52,18 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
+import com.sberg413.rickandmorty.ui.theme.getTopAppColors
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
+fun MainCharacterListScreen(viewModel: MainViewModel = viewModel(), navController: NavController) {
 
+    val uiState by viewModel.uiState.collectAsState()
     val characters = viewModel.listData.collectAsLazyPagingItems()
+
     val (textState, setTextState) = rememberSaveable { mutableStateOf("") }
     val onSearch: (String) -> Unit = {
         viewModel.setSearchFilter(it)
@@ -51,38 +73,114 @@ fun MainCharacterListScreen(viewModel: MainViewModel, modifier: Modifier = Modif
         viewModel.updateStateWithCharacterClicked(it)
     }
 
-    Column(modifier) {
+    LaunchedEffect(Unit) {
+        viewModel.characterClicked
+            .filterNotNull()
+            .collect { character ->
+                val action = MainFragmentDirections.actionShowDetailFragment(character.id)
+                Log.d("MainCharacterListScreen", "characterClicked: $character | action: $action")
+                navController.navigate(action.actionId, action.arguments)
+                // Reset the state in the ViewModel
+                viewModel.updateStateWithCharacterClicked(null)
+            }
+    }
 
-        CharacterSearchInput(textState,
-            modifier = modifier.padding(horizontal = 16.dp, vertical = 5.dp),
-            onValChange = setTextState,
-            onSearch = onSearch
+
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.app_name)) },
+                colors = getTopAppColors(),
+                actions = {
+                    StatusDropdownMenu(
+                        options = stringArrayResource(id = R.array.filter_options).asList(),
+                        selectedOption = uiState.statusFilter.status,
+                        onSelection = { viewModel.setStatusFilter(it) }
+                    )
+                }
+            )
+
+        }
+    ) { innerPadding ->
+        Column(Modifier.padding(innerPadding)) {
+            CharacterSearchInput(
+                textState,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                onValChange = setTextState,
+                onSearch = onSearch
+            )
+
+            CharacterList(characters = characters, onItemClicked =  onItemClicked)
+        }
+
+    }
+}
+
+@Composable
+fun StatusDropdownMenu(
+    options: List<String>,
+    selectedOption: String?,
+    onSelection: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    IconButton(onClick = { expanded = !expanded }) {
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = "More"
         )
-
-        when (characters.loadState.refresh) {
-            LoadState.Loading -> {
-                LoadingScreen(modifier = modifier)
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false}) {
+            options.forEachIndexed { i, option ->
+                DropdownMenuItem(
+                    text = { Text(text = option) },
+                    trailingIcon = {
+                       if (selectedOption == option || (selectedOption == null && i == 0 )) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selected"
+                            )
+                       }
+                    },
+                    onClick = {
+                        expanded = false
+                        Log.d("StatusDropdownMenu", "Status selected: $option")
+                        onSelection(option)
+                    })
             }
 
-            is LoadState.Error -> {
-                ShowErrorLoadStateToast(characters.loadState)
-            }
+        }
 
-            else -> {
-                if (characters.itemCount > 0) {
-                    LazyColumn(modifier = modifier) {
-                        items(count = characters.itemCount) { index ->
-                            characters[index]?.let { item ->
-                                CharacterListItem(
-                                    character = item,
-                                    clickListener = onItemClicked
-                                )
-                            }
+    }
+
+}
+
+@Composable
+fun CharacterList(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
+
+    when (characters.loadState.refresh) {
+        LoadState.Loading -> {
+            LoadingScreen(modifier = modifier)
+        }
+
+        is LoadState.Error -> {
+            ShowErrorLoadStateToast(characters.loadState)
+        }
+
+        else -> {
+            if (characters.itemCount > 0) {
+                LazyColumn(modifier = modifier) {
+                    items(count = characters.itemCount) { index ->
+                        characters[index]?.let { item ->
+                            CharacterListItem(
+                                character = item,
+                                clickListener = onItemClicked
+                            )
                         }
                     }
-                } else {
-                    EmptyResultsView(modifier = modifier)
                 }
+            } else {
+                EmptyResultsView(modifier = modifier)
             }
         }
     }
