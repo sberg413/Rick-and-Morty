@@ -12,6 +12,7 @@ fragmentVersion = "1.8.2"
 glide = "4.16.0"
 glideCompose = "1.0.0-beta01"
 hilt  = "2.51.1"
+hiltNavigationCompose = "1.2.0"
 junit = "4.13.2"
 junitKtx = "1.2.1"
 kotlin = "1.9.23"
@@ -51,6 +52,7 @@ androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "androidxCoreTesting" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentVersion" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragmentVersion" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junitKtx" }
 androidx-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "junitKtx" }
 androidx-legacy-support-v4 = { module = "androidx.legacy:legacy-support-v4", version.ref = "legacySupportV4" }
