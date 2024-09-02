@@ -22,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -42,15 +42,16 @@ import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.ui.LoadingScreen
-import com.sberg413.rickandmorty.utils.findActivity
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
+import com.sberg413.rickandmorty.utils.findActivity
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CharacterDetailScreen(viewModel: DetailViewModel = viewModel(), navController: NavController) {
+fun CharacterDetailScreen(
+    viewModel: DetailViewModel,
+    navController: NavController
+) {
 
     val uiState by viewModel.uiState.collectAsState()
 

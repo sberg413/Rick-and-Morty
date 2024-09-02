@@ -40,7 +40,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -54,12 +53,11 @@ import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainCharacterListScreen(viewModel: MainViewModel = viewModel(), navController: NavController) {
+fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavController ) {
 
     val uiState by viewModel.uiState.collectAsState()
     val characters = viewModel.listData.collectAsLazyPagingItems()
@@ -77,9 +75,8 @@ fun MainCharacterListScreen(viewModel: MainViewModel = viewModel(), navControlle
         viewModel.characterClicked
             .filterNotNull()
             .collect { character ->
-                val action = MainFragmentDirections.actionShowDetailFragment(character.id)
-                Log.d("MainCharacterListScreen", "characterClicked: $character | action: $action")
-                navController.navigate(action.actionId, action.arguments)
+                Log.d("MainCharacterListScreen", "characterClicked: $character")
+                navController.navigate("character_detail/${character.id}")
                 // Reset the state in the ViewModel
                 viewModel.updateStateWithCharacterClicked(null)
             }
