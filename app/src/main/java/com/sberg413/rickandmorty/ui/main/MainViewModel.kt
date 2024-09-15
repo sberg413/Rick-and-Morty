@@ -13,12 +13,14 @@ import com.sberg413.rickandmorty.ui.SearchFilter
 import com.sberg413.rickandmorty.ui.StatusFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -37,8 +39,8 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
-    val characterClicked: StateFlow<Character?> get() = _characterClicked
-    private val _characterClicked = MutableStateFlow<Character?>(null)
+    private val _characterClicked = Channel<Character>(Channel.BUFFERED)
+    val characterClicked = _characterClicked.receiveAsFlow()
 
     val listData: Flow<PagingData<Character>> = _uiState
         .flatMapLatest {
@@ -75,9 +77,9 @@ class MainViewModel @Inject constructor(private val characterRepository: Charact
         }
     }
 
-    fun updateStateWithCharacterClicked(character: Character?) {
+    fun updateStateWithCharacterClicked(character: Character) {
         viewModelScope.launch {
-            _characterClicked.value = character
+            _characterClicked.send(character)
         }
     }
 

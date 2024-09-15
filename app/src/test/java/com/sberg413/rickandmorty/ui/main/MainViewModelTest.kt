@@ -1,7 +1,6 @@
 package com.sberg413.rickandmorty.ui.main
 
 import androidx.paging.PagingData
-import app.cash.turbine.test
 import com.sberg413.rickandmorty.MainCoroutineRule
 import com.sberg413.rickandmorty.TestData
 import com.sberg413.rickandmorty.data.model.Character
@@ -9,6 +8,8 @@ import com.sberg413.rickandmorty.data.repository.CharacterRepository
 import com.sberg413.rickandmorty.util.collectDataForTest
 import junit.framework.TestCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -130,16 +131,15 @@ class MainViewModelTest : TestCase() {
 
     @Test
     fun testUpdateStateAfterUiClick() = runTest {
+        val testCharacter = TestData.TEST_CHARACTER
 
-        viewModel.characterClicked.test {
-            assertEquals(null, awaitItem()) // Initial value is null
+        // Launch a coroutine to collect from the channel
+        val collectedCharacter = async { viewModel.characterClicked.first() }
 
-            viewModel.updateStateWithCharacterClicked(TestData.TEST_CHARACTER)
+        viewModel.updateStateWithCharacterClicked(testCharacter)
 
-            assertEquals(TestData.TEST_CHARACTER, awaitItem())
-
-            cancelAndIgnoreRemainingEvents()
-        }
+        // Wait for the character to be collected
+        assertEquals(testCharacter, collectedCharacter.await())
     }
 
     companion object {

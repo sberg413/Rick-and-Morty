@@ -77,8 +77,6 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
             .collect { character ->
                 Log.d("MainCharacterListScreen", "characterClicked: $character")
                 navController.navigate("character_detail/${character.id}")
-                // Reset the state in the ViewModel
-                viewModel.updateStateWithCharacterClicked(null)
             }
     }
 
