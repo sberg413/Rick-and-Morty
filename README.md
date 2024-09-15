@@ -14,6 +14,7 @@ This project demonstrates several development best practices, modern Android lib
 - **Architecture Components**: Utilizes ViewModel and other Jetpack libraries for robust app structure.
 - **Androidx Paging 3**: Efficiently loads and displays paginated data from the API.
 - **Room Database**: Provides a seamless way to store and manage local data with SQLite.
+- **Jetpack Navigation**: Provides a consistent mechanism to navigate between destinations.
 - **Hilt Dependency Injection**: Simplifies dependency injection in the app.
 - **Kotlin Coroutines and Flow**: Manages asynchronous operations and data streams effectively.
 - **Retrofit**: Facilitates network requests to the Rick and Morty API.
