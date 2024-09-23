@@ -1,9 +1,9 @@
-# Rick & Morty Sample Android App
-This application is a sample Android app that uses [The Rick and Morty API](https://rickandmortyapi.com/) to display of list of characters. Click on a character from the list opens a more detailed view of the character.
+# Rick & Morty Android App
+This project, developed by [Steve Bergamini](https://tech.stevebergamini.com/), is a sample Android app that showcases characters from the popular show Rick and Morty. Using [The Rick and Morty API](https://rickandmortyapi.com/), the app allows users to browse a list of characters and view detailed profiles. Built using modern Android architecture and best practices, this project demonstrates effective use of Jetpack Compose, MVVM, and other advanced features.
 
 ![Build Status](https://github.com/sberg413/Rick-and-Morty/actions/workflows/github-actions.yml/badge.svg)
 [![codecov](https://codecov.io/gh/sberg413/Rick-and-Morty/graph/badge.svg?token=VERTJX6G1O)](https://codecov.io/gh/sberg413/Rick-and-Morty)
-## Features and Best Practices
+## Rick and Morty Android App Features and Best Practices
 
 This project demonstrates several development best practices, modern Android libraries, and architectural concepts, including:
 
@@ -24,13 +24,17 @@ This project demonstrates several development best practices, modern Android lib
 - **Jacoco Code Coverage**: Measures and reports test coverage to help identify untested parts of the codebase.
 - **CI/CD Workflows**: Utilizes GitHub Actions to run tests, lint checks, and code coverage on all PRs.
 
-## Screenshots
+This Rick and Morty Android app was developed by [Steve Bergamini](https://tech.stevebergamini.com/) as a showcase of modern Android development techniques.
 
-<img src="screenshots/main_light.png" alt="Main Light" width=270> <img src="screenshots/detail_light.png" alt="Detail Light" width=270>
+## Rick and Morty Android App Screenshots
 
-<img src="screenshots/main_dark.png" alt="Main Dark" width=270> <img src="screenshots/detail_dark.png" alt="Detail Dark" width=270>
+<img src="screenshots/main_light.png" alt="Rick and Morty Android App Main Light Theme" width=270>
+<img src="screenshots/detail_light.png" alt="Rick and Morty Android App Character Detail Light Theme" width=270>
+<img src="screenshots/main_dark.png" alt="Rick and Morty Android App Main Dark Theme" width=270>
+<img src="screenshots/detail_dark.png" alt="Rick and Morty Android App Character Detail Dark Theme" width=270>
 
-## Getting Started
+
+## Rick and Morty Android App Getting Started
 
 To run this project locally, follow these steps:
 
@@ -48,5 +52,9 @@ To run this project locally, follow these steps:
 
 - Connect an Android device or start an emulator.
 - Click "Run" in Android Studio or use the ./gradlew assembleDebug command.
+
+## About the Developer
+
+This project was created by **[Steve Bergamini](https://tech.stevebergamini.com/)**, a passionate Android developer specializing in Kotlin, Jetpack Compose, and Android architecture best practices.
 
 
