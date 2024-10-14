@@ -136,7 +136,7 @@ fun CharacterDetail(uiState: CharacterDetailUiState, backAction: () -> Unit) {
                         }
 
                         CharacterDetailContent(
-                            modifier = Modifier.padding(innerPadding),
+                            modifier = Modifier.padding(innerPadding).testTag("character_detail"),
                             character = character,
                             locationData = location
                         )

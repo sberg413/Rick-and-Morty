@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serializable)
     alias(libs.plugins.navigation.safeargs)
+    alias(libs.plugins.baselineprofile)
 }
 
 apply( from = "$rootDir/jacoco.gradle")
@@ -35,6 +36,7 @@ android {
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -101,6 +103,8 @@ dependencies {
     implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.profileinstaller)
+    "baselineProfile"(project(":baselineprofile"))
     ksp(libs.glide.ksp)
 
     implementation(libs.hilt.android)
