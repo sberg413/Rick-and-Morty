@@ -10,7 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
@@ -80,7 +81,7 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
             }
     }
 
-
+    var expanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -91,6 +92,8 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
                     StatusDropdownMenu(
                         options = stringArrayResource(id = R.array.filter_options).asList(),
                         selectedOption = uiState.statusFilter.status,
+                        expanded = expanded,
+                        onExpandChange = { expanded = it },
                         onSelection = { viewModel.setStatusFilter(it) }
                     )
                 }
@@ -106,7 +109,7 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
                 onSearch = onSearch
             )
 
-            CharacterList(characters = characters, onItemClicked =  onItemClicked)
+            CharacterResultContent(characters = characters, onItemClicked =  onItemClicked)
         }
 
     }
@@ -116,16 +119,19 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
 fun StatusDropdownMenu(
     options: List<String>,
     selectedOption: String?,
+    expanded: Boolean,
+    onExpandChange: (Boolean) -> Unit,
     onSelection: (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    IconButton(onClick = { expanded = !expanded }) {
+    IconButton(onClick = { onExpandChange(!expanded) }) {
         Icon(
             imageVector = Icons.Default.MoreVert,
             contentDescription = "More"
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false}) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandChange(false) }
+        ) {
             options.forEachIndexed { i, option ->
                 DropdownMenuItem(
                     text = { Text(text = option) },
@@ -138,7 +144,7 @@ fun StatusDropdownMenu(
                        }
                     },
                     onClick = {
-                        expanded = false
+                        onExpandChange(false)
                         Log.d("StatusDropdownMenu", "Status selected: $option")
                         onSelection(option)
                     })
@@ -151,31 +157,32 @@ fun StatusDropdownMenu(
 }
 
 @Composable
-fun CharacterList(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
-
+fun CharacterResultContent(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
     when (characters.loadState.refresh) {
-        LoadState.Loading -> {
-            LoadingScreen(modifier = modifier)
-        }
-
-        is LoadState.Error -> {
-            ShowErrorLoadStateToast(characters.loadState)
-        }
-
+        LoadState.Loading -> LoadingScreen(modifier = modifier)
+        is LoadState.Error -> ShowErrorLoadStateToast(characters.loadState)
         else -> {
             if (characters.itemCount > 0) {
-                LazyColumn(modifier = modifier) {
-                    items(count = characters.itemCount) { index ->
-                        characters[index]?.let { item ->
-                            CharacterListItem(
-                                character = item,
-                                clickListener = onItemClicked
-                            )
-                        }
-                    }
-                }
+                CharacterGridResults(modifier, characters, onItemClicked)
             } else {
                 EmptyResultsView(modifier = modifier)
+            }
+        }
+    }
+}
+
+@Composable
+fun CharacterGridResults(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(280.dp),
+        modifier = modifier
+    ) {
+        items(count = characters.itemCount) { index ->
+            characters[index]?.let { item ->
+                CharacterListItem(
+                    character = item,
+                    clickListener = onItemClicked
+                )
             }
         }
     }
