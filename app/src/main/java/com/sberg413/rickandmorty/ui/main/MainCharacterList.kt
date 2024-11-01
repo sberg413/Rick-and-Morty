@@ -22,6 +22,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -82,6 +85,7 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
     }
 
     var expanded by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
@@ -99,7 +103,8 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
                 }
             )
 
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding)) {
             CharacterSearchInput(
@@ -109,7 +114,7 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
                 onSearch = onSearch
             )
 
-            CharacterResultContent(characters = characters, onItemClicked =  onItemClicked)
+            CharacterResultContent(characters = characters, onItemClicked =  onItemClicked, snackbarHostState = snackbarHostState)
         }
 
     }
@@ -157,10 +162,23 @@ fun StatusDropdownMenu(
 }
 
 @Composable
-fun CharacterResultContent(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
-    when (characters.loadState.refresh) {
+fun CharacterResultContent(modifier: Modifier = Modifier,
+                           characters: LazyPagingItems<Character>,
+                           onItemClicked: (Character) -> Unit,
+                           snackbarHostState: SnackbarHostState) {
+    val loadState = characters.loadState.refresh
+    when (loadState) {
         LoadState.Loading -> LoadingScreen(modifier = modifier)
-        is LoadState.Error -> ShowErrorLoadStateToast(characters.loadState)
+        is LoadState.Error -> {
+            // Display the error snackbar using LaunchedEffect directly on loadState
+            LaunchedEffect(loadState) {
+                snackbarHostState.showSnackbar(
+                    message = "ERROR: ${loadState.error.localizedMessage ?: "Unknown error"}",
+                    duration = SnackbarDuration.Short
+                )
+            }
+            EmptyResultsView(modifier = modifier) // Optional: Show empty view in case of error
+        }
         else -> {
             if (characters.itemCount > 0) {
                 CharacterGridResults(modifier, characters, onItemClicked)
@@ -206,11 +224,11 @@ fun CharacterListItem(character: Character, modifier: Modifier = Modifier, click
             GlideImage(
                 model = character.image,
                 contentDescription = character.name,
-                modifier = modifier.size(60.dp),
+                modifier = Modifier.size(60.dp),
                 loading = placeholder(R.drawable.avatar_placeholder)
             )
 
-            Column(modifier = modifier.padding(start = 15.dp)) {
+            Column(modifier = Modifier.padding(start = 15.dp)) {
                 Text(
                     text = character.name,
                     style = MaterialTheme.typography.titleMedium,
@@ -218,13 +236,13 @@ fun CharacterListItem(character: Character, modifier: Modifier = Modifier, click
                 )
 
                 Row(
-                    modifier = modifier.padding(
+                    modifier = Modifier.padding(
                         top = 5.dp
                     )
                 ) {
                     Text(
                         text = character.status,
-                        modifier = modifier.padding(end = 10.dp),
+                        modifier = Modifier.padding(end = 10.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -280,20 +298,4 @@ fun EmptyResultsView(modifier: Modifier = Modifier) {
 @Composable
 fun EmptyResultsViewPreview() {
     EmptyResultsView()
-}
-
-@Composable
-fun ShowErrorLoadStateToast(loadState: CombinedLoadStates) {
-    val context = LocalContext.current
-    val errorState = loadState.let {
-        it.source.append as? LoadState.Error ?: it.source.prepend as? LoadState.Error
-        ?: it.append as? LoadState.Error ?: it.prepend as? LoadState.Error
-    }
-    errorState?.let {
-        Toast.makeText(
-            context,
-            "ERROR: ${it.error}",
-            Toast.LENGTH_SHORT
-        ).show()
-    }
 }
