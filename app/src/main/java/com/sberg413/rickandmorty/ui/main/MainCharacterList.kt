@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -90,6 +91,7 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.testTag("TopAppBar"),
                 title = { Text(stringResource(id = R.string.app_name)) },
                 colors = getTopAppColors(),
                 actions = {
@@ -109,7 +111,9 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
         Column(Modifier.padding(innerPadding)) {
             CharacterSearchInput(
                 textState,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 5.dp)
+                    .testTag("CharacterSearchInput"),
                 onValChange = setTextState,
                 onSearch = onSearch
             )
@@ -192,8 +196,8 @@ fun CharacterResultContent(modifier: Modifier = Modifier,
 @Composable
 fun CharacterGridResults(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(280.dp),
-        modifier = modifier
+        modifier = modifier.testTag("CharacterList"),
+        columns = GridCells.Adaptive(280.dp)
     ) {
         items(count = characters.itemCount) { index ->
             characters[index]?.let { item ->
@@ -282,7 +286,7 @@ fun CharacterListItemPreview() {
 fun EmptyResultsView(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize().testTag("EmptyResultsView")
     ) {
         Text(
             text = stringResource(id = R.string.no_results),
