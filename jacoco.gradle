@@ -25,7 +25,6 @@ tasks.register('jacocoTestReport', JacocoReport) {
             '**/*_Factory.*',  // Dagger generated factories
             '**/*_MembersInjector.*',  // Dagger members injectors
             '**/*_Provide*Factory.*',  // Dagger provides factories
-            '**/*Preview*', // Compose Preview functions
             'android/**/*.*'
     ]
 

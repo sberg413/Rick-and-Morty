@@ -57,6 +57,7 @@ import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
+import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import kotlinx.coroutines.flow.filterNotNull
 
 
@@ -263,6 +264,7 @@ fun CharacterListItem(character: Character, modifier: Modifier = Modifier, click
     }
 }
 
+@ExcludeFromJacocoGeneratedReport
 @Preview
 @Composable
 fun CharacterListItemPreview() {
@@ -297,7 +299,7 @@ fun EmptyResultsView(modifier: Modifier = Modifier) {
     }
 }
 
-
+@ExcludeFromJacocoGeneratedReport
 @Preview(showBackground = true)
 @Composable
 fun EmptyResultsViewPreview() {
