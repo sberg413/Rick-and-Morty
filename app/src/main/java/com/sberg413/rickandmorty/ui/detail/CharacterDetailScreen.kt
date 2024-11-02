@@ -45,6 +45,7 @@ import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.ui.LoadingScreen
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
+import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import com.sberg413.rickandmorty.utils.findActivity
 
 
@@ -190,6 +191,7 @@ private fun CharacterDetailRow(modifier: Modifier =  Modifier, @StringRes label:
 
 }
 
+@ExcludeFromJacocoGeneratedReport
 @Preview
 @Composable
 private fun CharacterDetailContentPreview() {
