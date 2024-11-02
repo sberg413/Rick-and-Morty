@@ -10,7 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
@@ -21,6 +22,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -80,33 +85,40 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
             }
     }
 
-
+    var expanded by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.testTag("TopAppBar"),
                 title = { Text(stringResource(id = R.string.app_name)) },
                 colors = getTopAppColors(),
                 actions = {
                     StatusDropdownMenu(
                         options = stringArrayResource(id = R.array.filter_options).asList(),
                         selectedOption = uiState.statusFilter.status,
+                        expanded = expanded,
+                        onExpandChange = { expanded = it },
                         onSelection = { viewModel.setStatusFilter(it) }
                     )
                 }
             )
 
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding)) {
             CharacterSearchInput(
                 textState,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 5.dp)
+                    .testTag("CharacterSearchInput"),
                 onValChange = setTextState,
                 onSearch = onSearch
             )
 
-            CharacterList(characters = characters, onItemClicked =  onItemClicked)
+            CharacterResultContent(characters = characters, onItemClicked =  onItemClicked, snackbarHostState = snackbarHostState)
         }
 
     }
@@ -116,16 +128,19 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
 fun StatusDropdownMenu(
     options: List<String>,
     selectedOption: String?,
+    expanded: Boolean,
+    onExpandChange: (Boolean) -> Unit,
     onSelection: (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    IconButton(onClick = { expanded = !expanded }) {
+    IconButton(onClick = { onExpandChange(!expanded) }) {
         Icon(
             imageVector = Icons.Default.MoreVert,
             contentDescription = "More"
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false}) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandChange(false) }
+        ) {
             options.forEachIndexed { i, option ->
                 DropdownMenuItem(
                     text = { Text(text = option) },
@@ -138,7 +153,7 @@ fun StatusDropdownMenu(
                        }
                     },
                     onClick = {
-                        expanded = false
+                        onExpandChange(false)
                         Log.d("StatusDropdownMenu", "Status selected: $option")
                         onSelection(option)
                     })
@@ -151,31 +166,45 @@ fun StatusDropdownMenu(
 }
 
 @Composable
-fun CharacterList(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
-
-    when (characters.loadState.refresh) {
-        LoadState.Loading -> {
-            LoadingScreen(modifier = modifier)
-        }
-
+fun CharacterResultContent(modifier: Modifier = Modifier,
+                           characters: LazyPagingItems<Character>,
+                           onItemClicked: (Character) -> Unit,
+                           snackbarHostState: SnackbarHostState) {
+    val loadState = characters.loadState.refresh
+    when (loadState) {
+        LoadState.Loading -> LoadingScreen(modifier = modifier)
         is LoadState.Error -> {
-            ShowErrorLoadStateToast(characters.loadState)
+            // Display the error snackbar using LaunchedEffect directly on loadState
+            LaunchedEffect(loadState) {
+                snackbarHostState.showSnackbar(
+                    message = "ERROR: ${loadState.error.localizedMessage ?: "Unknown error"}",
+                    duration = SnackbarDuration.Short
+                )
+            }
+            EmptyResultsView(modifier = modifier) // Optional: Show empty view in case of error
         }
-
         else -> {
             if (characters.itemCount > 0) {
-                LazyColumn(modifier = modifier) {
-                    items(count = characters.itemCount) { index ->
-                        characters[index]?.let { item ->
-                            CharacterListItem(
-                                character = item,
-                                clickListener = onItemClicked
-                            )
-                        }
-                    }
-                }
+                CharacterGridResults(modifier, characters, onItemClicked)
             } else {
                 EmptyResultsView(modifier = modifier)
+            }
+        }
+    }
+}
+
+@Composable
+fun CharacterGridResults(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
+    LazyVerticalGrid(
+        modifier = modifier.testTag("CharacterList"),
+        columns = GridCells.Adaptive(280.dp)
+    ) {
+        items(count = characters.itemCount) { index ->
+            characters[index]?.let { item ->
+                CharacterListItem(
+                    character = item,
+                    clickListener = onItemClicked
+                )
             }
         }
     }
@@ -199,11 +228,11 @@ fun CharacterListItem(character: Character, modifier: Modifier = Modifier, click
             GlideImage(
                 model = character.image,
                 contentDescription = character.name,
-                modifier = modifier.size(60.dp),
+                modifier = Modifier.size(60.dp),
                 loading = placeholder(R.drawable.avatar_placeholder)
             )
 
-            Column(modifier = modifier.padding(start = 15.dp)) {
+            Column(modifier = Modifier.padding(start = 15.dp)) {
                 Text(
                     text = character.name,
                     style = MaterialTheme.typography.titleMedium,
@@ -211,13 +240,13 @@ fun CharacterListItem(character: Character, modifier: Modifier = Modifier, click
                 )
 
                 Row(
-                    modifier = modifier.padding(
+                    modifier = Modifier.padding(
                         top = 5.dp
                     )
                 ) {
                     Text(
                         text = character.status,
-                        modifier = modifier.padding(end = 10.dp),
+                        modifier = Modifier.padding(end = 10.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -257,7 +286,7 @@ fun CharacterListItemPreview() {
 fun EmptyResultsView(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize().testTag("EmptyResultsView")
     ) {
         Text(
             text = stringResource(id = R.string.no_results),
@@ -273,20 +302,4 @@ fun EmptyResultsView(modifier: Modifier = Modifier) {
 @Composable
 fun EmptyResultsViewPreview() {
     EmptyResultsView()
-}
-
-@Composable
-fun ShowErrorLoadStateToast(loadState: CombinedLoadStates) {
-    val context = LocalContext.current
-    val errorState = loadState.let {
-        it.source.append as? LoadState.Error ?: it.source.prepend as? LoadState.Error
-        ?: it.append as? LoadState.Error ?: it.prepend as? LoadState.Error
-    }
-    errorState?.let {
-        Toast.makeText(
-            context,
-            "ERROR: ${it.error}",
-            Toast.LENGTH_SHORT
-        ).show()
-    }
 }
