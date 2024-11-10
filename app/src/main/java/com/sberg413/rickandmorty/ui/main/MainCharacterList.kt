@@ -1,7 +1,14 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+
 package com.sberg413.rickandmorty.ui.main
 
 import android.util.Log
-import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
@@ -38,7 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +54,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -56,14 +63,19 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
+import com.sberg413.rickandmorty.ui.NavRoute
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import kotlinx.coroutines.flow.filterNotNull
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavController ) {
+fun MainCharacterListScreen(
+    viewModel: MainViewModel,
+    navController: NavController,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
+) {
 
     val uiState by viewModel.uiState.collectAsState()
     val characters = viewModel.listData.collectAsLazyPagingItems()
@@ -82,7 +94,7 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
             .filterNotNull()
             .collect { character ->
                 Log.d("MainCharacterListScreen", "characterClicked: $character")
-                navController.navigate("character_detail/${character.id}")
+                navController.navigate(NavRoute.DetailScreen(character.id))
             }
     }
 
@@ -119,7 +131,13 @@ fun MainCharacterListScreen(viewModel: MainViewModel, navController: NavControll
                 onSearch = onSearch
             )
 
-            CharacterResultContent(characters = characters, onItemClicked =  onItemClicked, snackbarHostState = snackbarHostState)
+            CharacterResultContent(
+                characters = characters,
+                onItemClicked = onItemClicked,
+                snackbarHostState = snackbarHostState,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope
+            )
         }
 
     }
@@ -167,12 +185,15 @@ fun StatusDropdownMenu(
 }
 
 @Composable
-fun CharacterResultContent(modifier: Modifier = Modifier,
-                           characters: LazyPagingItems<Character>,
-                           onItemClicked: (Character) -> Unit,
-                           snackbarHostState: SnackbarHostState) {
-    val loadState = characters.loadState.refresh
-    when (loadState) {
+fun CharacterResultContent(
+    modifier: Modifier = Modifier,
+    characters: LazyPagingItems<Character>,
+    onItemClicked: (Character) -> Unit,
+    snackbarHostState: SnackbarHostState,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
+) {
+    when (val loadState = characters.loadState.refresh) {
         LoadState.Loading -> LoadingScreen(modifier = modifier)
         is LoadState.Error -> {
             // Display the error snackbar using LaunchedEffect directly on loadState
@@ -186,7 +207,7 @@ fun CharacterResultContent(modifier: Modifier = Modifier,
         }
         else -> {
             if (characters.itemCount > 0) {
-                CharacterGridResults(modifier, characters, onItemClicked)
+                CharacterGridResults(modifier, characters, onItemClicked, sharedTransitionScope, animatedContentScope)
             } else {
                 EmptyResultsView(modifier = modifier)
             }
@@ -195,7 +216,13 @@ fun CharacterResultContent(modifier: Modifier = Modifier,
 }
 
 @Composable
-fun CharacterGridResults(modifier: Modifier = Modifier, characters: LazyPagingItems<Character>, onItemClicked: (Character) -> Unit) {
+fun CharacterGridResults(
+    modifier: Modifier = Modifier,
+    characters: LazyPagingItems<Character>,
+    onItemClicked: (Character) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
+) {
     LazyVerticalGrid(
         modifier = modifier.testTag("CharacterList"),
         columns = GridCells.Adaptive(280.dp)
@@ -204,7 +231,9 @@ fun CharacterGridResults(modifier: Modifier = Modifier, characters: LazyPagingIt
             characters[index]?.let { item ->
                 CharacterListItem(
                     character = item,
-                    clickListener = onItemClicked
+                    clickListener = onItemClicked,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope
                 )
             }
         }
@@ -213,7 +242,13 @@ fun CharacterGridResults(modifier: Modifier = Modifier, characters: LazyPagingIt
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun CharacterListItem(character: Character, modifier: Modifier = Modifier, clickListener: (Character) -> Unit) {
+fun CharacterListItem(
+    character: Character,
+    modifier: Modifier = Modifier,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    clickListener: (Character) -> Unit,
+) {
 
     Surface(
         modifier = modifier
@@ -224,42 +259,69 @@ fun CharacterListItem(character: Character, modifier: Modifier = Modifier, click
         tonalElevation = 4.dp,
         color = MaterialTheme.colorScheme.surface
     ) {
-        Row(modifier = Modifier.padding(12.dp)) {
-
-            GlideImage(
-                model = character.image,
-                contentDescription = character.name,
-                modifier = Modifier.size(60.dp),
-                loading = placeholder(R.drawable.avatar_placeholder)
-            )
-
-            Column(modifier = Modifier.padding(start = 15.dp)) {
-                Text(
-                    text = character.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+        with(sharedTransitionScope) {
+            Row(modifier = Modifier.padding(12.dp)) {
+                GlideImage(
+                    model = character.image,
+                    contentDescription = character.name,
+                    modifier = Modifier
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "image-${character.id}"),
+                            animatedVisibilityScope = animatedContentScope,
+                            boundsTransform = { _, _ ->
+                                spring(
+                                    dampingRatio = 0.8f,
+                                    stiffness = 385f
+                                )
+                            }
+                        )
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    loading = placeholder(R.drawable.avatar_placeholder)
                 )
 
-                Row(
-                    modifier = Modifier.padding(
-                        top = 5.dp
-                    )
-                ) {
+                Column(modifier = Modifier.padding(start = 22.dp).align(Alignment.CenterVertically)) {
                     Text(
-                        text = character.status,
-                        modifier = Modifier.padding(end = 10.dp),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        modifier = Modifier
+                            .sharedBounds(
+                                sharedTransitionScope.rememberSharedContentState(key = "name-${character.id}"),
+                                animatedVisibilityScope = animatedContentScope
+                            ),
+                        text = character.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Text(
-                        text = character.species,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(
+                        modifier = Modifier.padding(
+                            top = 5.dp
+                        )
+                    ) {
+                        Text(
+                            text = character.status,
+                            modifier = Modifier
+                                .sharedBounds(
+                                    sharedTransitionScope.rememberSharedContentState(key = "status-${character.id}"),
+                                    animatedVisibilityScope = animatedContentScope
+                                )
+                                .padding(end = 10.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Text(
+                            text = character.species,
+                            modifier = Modifier
+                                .sharedBounds(
+                                    sharedTransitionScope.rememberSharedContentState(key = "species-${character.id}"),
+                                    animatedVisibilityScope = animatedContentScope
+                                ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
-
         }
     }
 }
@@ -280,7 +342,18 @@ fun CharacterListItemPreview() {
         "Beth Smith"
     )
     MaterialTheme {
-        CharacterListItem(character = beth, Modifier) {}
+        SharedTransitionLayout {
+            AnimatedContent(true, label = "test") { targetState ->
+                if (targetState) {
+                    CharacterListItem(
+                        character = beth,
+                        Modifier,
+                        this@SharedTransitionLayout,
+                        this@AnimatedContent
+                    ) {}
+                }
+            }
+        }
     }
 }
 
@@ -288,7 +361,9 @@ fun CharacterListItemPreview() {
 fun EmptyResultsView(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize().testTag("EmptyResultsView")
+        modifier = modifier
+            .fillMaxSize()
+            .testTag("EmptyResultsView")
     ) {
         Text(
             text = stringResource(id = R.string.no_results),

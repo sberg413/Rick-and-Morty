@@ -1,10 +1,16 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+
 package com.sberg413.rickandmorty.ui.detail
 
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -49,11 +57,12 @@ import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import com.sberg413.rickandmorty.utils.findActivity
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterDetailScreen(
     viewModel: DetailViewModel,
-    navController: NavController
+    navController: NavController,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
@@ -78,86 +87,123 @@ fun CharacterDetailScreen(
         }
     ) { innerPadding ->
 
-        CharacterDetailContent(
-            modifier = Modifier.padding(innerPadding),
-            uiState = uiState
-        )
-    }
-
-
-}
-
-@Composable
-fun CharacterDetailContent(modifier: Modifier = Modifier, uiState: CharacterDetailUiState) {
-
-    when (uiState) {
-        is CharacterDetailUiState.Loading -> {
-            LoadingScreen()
-        }
-
-        is CharacterDetailUiState.Success -> {
-            val character = uiState.character
-            val location = uiState.location
-
-            val context = LocalContext.current.findActivity()
-            LaunchedEffect(Unit) {
-                (context as? AppCompatActivity)?.supportActionBar?.title = character.name
+        when (uiState) {
+            is CharacterDetailUiState.Loading -> {
+                LoadingScreen()
             }
 
-            CharacterDetailContent(
-                modifier = modifier,
-                characterData = character,
-                locationData = location
-            )
-        }
+            is CharacterDetailUiState.Success -> {
+                val character = (uiState as CharacterDetailUiState.Success).character
+                val location = (uiState as CharacterDetailUiState.Success).location
 
-        is CharacterDetailUiState.Error -> {
-            ShowErrorStateToast(uiState.message)
+                val context = LocalContext.current.findActivity()
+                LaunchedEffect(Unit) {
+                    (context as? AppCompatActivity)?.supportActionBar?.title = character.name
+                }
+
+                CharacterDetailContent(
+                    modifier = Modifier.padding(innerPadding),
+                    character = character,
+                    locationData = location,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope
+                )
+            }
+
+            is CharacterDetailUiState.Error -> {
+                ShowErrorStateToast((uiState as CharacterDetailUiState.Error).message)
+            }
         }
     }
+
+
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun CharacterDetailContent(modifier: Modifier = Modifier, characterData: Character, locationData: Location?) {
-    Surface(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+fun CharacterDetailContent(
+    modifier: Modifier = Modifier,
+    character: Character,
+    locationData: Location?,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
+) {
+    with(sharedTransitionScope) {
+        Surface(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            color = MaterialTheme.colorScheme.background
         ) {
-            CharacterImage(url = characterData.image, name = characterData.name)
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                GlideImage(
+                    model = character.image,
+                    contentDescription = stringResource(R.string.character_img_content_description, character.name),
+                    modifier = Modifier
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "image-${character.id}"),
+                            animatedVisibilityScope = animatedContentScope,
+                            boundsTransform = { _, _ ->
+                                spring(
+                                    dampingRatio = 0.8f,
+                                    stiffness = 385f
+                                )
+                            }
+                        )
+                        .width(260.dp)
+                        .height(260.dp)
+                        .padding(10.dp)
+                        //.align(Alignment.Center)
+                        .clip(RoundedCornerShape(12.dp)),
+                    loading = placeholder(R.drawable.avatar_placeholder)
+                )
 
-            Text(
-                text = characterData.name,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 18.dp)
-                    .testTag("CharacterName")
-            )
+                Text(
+                    text = character.name,
+                    modifier = Modifier
+                        .sharedBounds(
+                            sharedTransitionScope.rememberSharedContentState(key = "name-${character.id}"),
+                            animatedVisibilityScope = animatedContentScope
+                        )
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 18.dp)
+                        .testTag("CharacterName"),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
 
 
+                // CharacterDetailRow(label = "Type", data = characterData.type)
+                CharacterDetailRow(dataModifier = Modifier
+                    .sharedBounds(
+                        sharedTransitionScope.rememberSharedContentState(key = "status-${character.id}"),
+                        animatedVisibilityScope = animatedContentScope
+                    ),
+                    label = R.string.status,
+                    data = character.status)
+                CharacterDetailRow(dataModifier = Modifier
+                    .sharedBounds(
+                        sharedTransitionScope.rememberSharedContentState(key = "species-${character.id}"),
+                        animatedVisibilityScope = animatedContentScope
+                    ),
+                    label = R.string.species,
+                    data = character.species)
+                locationData?.let { location ->
+                    CharacterDetailRow(label = R.string.location, data = location.name)
+                    CharacterDetailRow(label = R.string.dimension, data = location.dimension)
+                }
+                // CharacterDetailRow(label = "Number of residents", data = locationData.residentCount.toString())
 
-            // CharacterDetailRow(label = "Type", data = characterData.type)
-            CharacterDetailRow(label = R.string.status, data = characterData.status)
-            CharacterDetailRow(label = R.string.species, data = characterData.species)
-            locationData?.let { location ->
-                CharacterDetailRow(label = R.string.location, data = location.name)
-                CharacterDetailRow(label = R.string.dimension, data = location.dimension)
             }
-            // CharacterDetailRow(label = "Number of residents", data = locationData.residentCount.toString())
-
         }
     }
 }
 
 @Composable
-private fun CharacterDetailRow(modifier: Modifier =  Modifier, @StringRes label: Int, data: String) {
+private fun CharacterDetailRow(modifier: Modifier =  Modifier, dataModifier: Modifier = Modifier, @StringRes label: Int, data: String ) {
     Row(
         modifier = modifier
             .padding(horizontal = 10.dp, vertical = 15.dp)
@@ -182,7 +228,7 @@ private fun CharacterDetailRow(modifier: Modifier =  Modifier, @StringRes label:
             text = data,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
+            modifier = dataModifier
                 .weight(1f)
                 .testTag(stringResource(label)),
             textAlign =  TextAlign.Start
@@ -217,27 +263,35 @@ private fun CharacterDetailContentPreview() {
 
     )
     MaterialTheme {
-        CharacterDetailContent(characterData = character, locationData = location)
+        SharedTransitionLayout {
+            AnimatedContent(true, label = "test") { targetState ->
+                if (targetState) {
+                    CharacterDetailContent(character = character, locationData = location,
+                        sharedTransitionScope = this@SharedTransitionLayout, animatedContentScope = this@AnimatedContent)
+                }
+            }
+        }
     }
 }
 
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun CharacterImage(url: String, name: String) {
-    Box(Modifier.fillMaxWidth()) {
-        GlideImage(
-            model = url,
-            contentDescription = stringResource(R.string.character_img_content_description, name),
-            modifier = Modifier
-                .width(200.dp)
-                .height(200.dp)
-                .padding(10.dp)
-                .align(Alignment.Center),
-            loading = placeholder(R.drawable.avatar_placeholder)
-        )
-    }
-}
+//@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+//@OptIn(ExperimentalGlideComposeApi::class)
+//@Composable
+//fun CharacterImage(url: String, name: String) {
+//    Box(Modifier.fillMaxWidth()) {
+//        GlideImage(
+//            model = url,
+//            contentDescription = stringResource(R.string.character_img_content_description, name),
+//            modifier = Modifier
+//                .width(200.dp)
+//                .height(200.dp)
+//                .padding(10.dp)
+//                .align(Alignment.Center)
+//                .clip(RoundedCornerShape(12.dp)),
+//            loading = placeholder(R.drawable.avatar_placeholder)
+//        )
+//    }
+//}
 
 @Composable
 fun ShowErrorStateToast(errMsg: String) {

@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.serializable)
     alias(libs.plugins.navigation.safeargs)
 }
 
@@ -84,6 +85,8 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.androidx.paging.compose)
+    implementation(libs.androidx.animation)
+    implementation(libs.androidx.ui)
 
     implementation(libs.retrofit)
     implementation(libs.converter.moshi)
@@ -114,6 +117,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.kotlinx.serialization.json)
 
     // UI Tests
     androidTestImplementation(composeBom)
