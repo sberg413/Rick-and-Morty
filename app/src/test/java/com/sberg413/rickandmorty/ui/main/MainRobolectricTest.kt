@@ -1,6 +1,9 @@
 package com.sberg413.rickandmorty.ui.main
 
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -26,6 +29,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.whenever
 
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @RunWith(AndroidJUnit4::class)
 class MainRobolectricTest {
 
@@ -74,9 +78,7 @@ class MainRobolectricTest {
         whenever(viewModel.listData).thenReturn( pagingData )
 
         // Set up the composable
-        composeTestRule.setContent {
-            MainCharacterListScreen(viewModel, navController)
-        }
+        initializeMainListScreenContent()
 
         composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
         composeTestRule.onNodeWithTag("CharacterSearchInput").assertExists()
@@ -107,11 +109,8 @@ class MainRobolectricTest {
 
         whenever(viewModel.listData).thenReturn( pagingData )
 
-
         // Set up the composable
-        composeTestRule.setContent {
-            MainCharacterListScreen(viewModel, navController)
-        }
+        initializeMainListScreenContent()
 
         // Verify that the Snackbar is shown with the correct message
         composeTestRule.onNodeWithText("ERROR: Test error").assertIsDisplayed()
@@ -142,14 +141,30 @@ class MainRobolectricTest {
         whenever(viewModel.listData).thenReturn( pagingData )
 
         // Set up the composable
-        composeTestRule.setContent {
-            MainCharacterListScreen(viewModel, navController)
-        }
+        initializeMainListScreenContent()
 
         // Verify that the Snackbar is shown with the correct message
         composeTestRule.onNodeWithTag("LoadingScreen").assertDoesNotExist()
         composeTestRule.onNodeWithTag("EmptyResultsView").assertDoesNotExist()
         composeTestRule.onNodeWithTag("CharacterList").assertIsDisplayed()
+    }
+
+    private fun initializeMainListScreenContent() {
+        composeTestRule.setContent {
+            SharedTransitionLayout {
+                AnimatedContent(true, label = "test") { targetState ->
+                    if (targetState) {
+                        MainCharacterListScreen(
+                            viewModel = viewModel,
+                            navController = navController,
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedContentScope = this
+                        )
+                    }
+                }
+            }
+        }
+
     }
 
 }

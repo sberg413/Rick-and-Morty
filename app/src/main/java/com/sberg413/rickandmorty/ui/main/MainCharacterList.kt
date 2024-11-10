@@ -63,7 +63,6 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
-import com.sberg413.rickandmorty.ui.NavRoute
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import kotlinx.coroutines.flow.filterNotNull
@@ -94,7 +93,7 @@ fun MainCharacterListScreen(
             .filterNotNull()
             .collect { character ->
                 Log.d("MainCharacterListScreen", "characterClicked: $character")
-                navController.navigate(NavRoute.DetailScreen(character.id))
+                navController.navigate("character_detail/${character.id}")
             }
     }
 

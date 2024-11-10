@@ -1,6 +1,9 @@
 package com.sberg413.rickandmorty.ui.detail
 
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.NavController
@@ -20,6 +23,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.whenever
 import org.robolectric.shadows.ShadowToast
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @RunWith(AndroidJUnit4::class)
 class DetailRobolectricTest {
 
@@ -50,9 +54,7 @@ class DetailRobolectricTest {
             )
         )
 
-        composeTestRule.setContent {
-            CharacterDetailScreen(viewModel = viewModel, navController = navController)
-        }
+        initializeDetailScreenContent()
 
         composeTestRule.onNodeWithTag("CharacterName").assertExists()
         composeTestRule.onNodeWithTag("Species").assertExists()
@@ -64,11 +66,7 @@ class DetailRobolectricTest {
     fun testLoadingState() {
         whenever(viewModel.uiState).thenReturn( MutableStateFlow(CharacterDetailUiState.Loading))
 
-        composeTestRule.setContent {
-            AppTheme {
-                CharacterDetailScreen(viewModel = viewModel, navController = navController)
-            }
-        }
+        initializeDetailScreenContent()
 
         // Verify LoadingScreen is displayed
         composeTestRule.onNodeWithTag("LoadingScreen").assertExists()
@@ -79,11 +77,7 @@ class DetailRobolectricTest {
         val errorMessage = "Test Error"
         whenever(viewModel.uiState).thenReturn(MutableStateFlow(CharacterDetailUiState.Error(errorMessage)))
 
-        composeTestRule.setContent {
-            AppTheme {
-                CharacterDetailScreen(viewModel = viewModel, navController = navController)
-            }
-        }
+        initializeDetailScreenContent()
 
         // Assert that error toast is displayed
         val latestToast = ShadowToast.getTextOfLatestToast()
@@ -95,16 +89,29 @@ class DetailRobolectricTest {
     fun testActionBarTitle() {
         whenever(viewModel.uiState).thenReturn( MutableStateFlow(CharacterDetailUiState.Success(TestData.TEST_CHARACTER, TestData.TEST_LOCATION)))
 
-        composeTestRule.setContent {
-            AppTheme {
-                CharacterDetailScreen(viewModel = viewModel, navController = navController)
-            }
-        }
+        initializeDetailScreenContent()
 
         // Wait for LaunchedEffect to execute
         composeTestRule.waitForIdle()
 
         val activity = composeTestRule.activity
         assertEquals(TestData.TEST_CHARACTER.name, activity.title)
+    }
+
+    private fun initializeDetailScreenContent() {
+        composeTestRule.setContent {
+            SharedTransitionLayout {
+                AnimatedContent(true, label = "test") { targetState ->
+                    if (targetState) {
+                        CharacterDetailScreen(
+                            viewModel = viewModel,
+                            navController = navController,
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedContentScope = this
+                        )
+                    }
+                }
+            }
+        }
     }
 }
