@@ -5,9 +5,11 @@ package com.sberg413.rickandmorty.ui.main
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -249,16 +251,29 @@ fun CharacterListItem(
     clickListener: (Character) -> Unit,
 ) {
 
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { clickListener(character) }
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        shape = MaterialTheme.shapes.medium,
-        tonalElevation = 4.dp,
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        with(sharedTransitionScope) {
+    with(sharedTransitionScope) {
+        val roundedCornerAnimation by animatedContentScope.transition.animateDp(label = "rounded corner") { enterExit ->
+            when (enterExit) {
+                EnterExitState.PreEnter -> 0.dp
+                EnterExitState.Visible -> 12.dp
+                EnterExitState.PostExit -> 12.dp
+            }
+        }
+        Surface(
+            modifier = modifier
+                .fillMaxWidth()
+                .clickable { clickListener(character) }
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .sharedBounds(
+                    sharedTransitionScope.rememberSharedContentState(key = "border-${character.id}"),
+                    animatedVisibilityScope = animatedContentScope,
+                    // clipInOverlayDuringTransition = OverlayClip( RoundedCornerShape(roundedCornerAnimation) )
+                ),
+            shape = MaterialTheme.shapes.medium,
+            tonalElevation = 4.dp,
+            color = MaterialTheme.colorScheme.surface,
+            // border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground)
+        ) {
             Row(modifier = Modifier.padding(12.dp)) {
                 GlideImage(
                     model = character.image,

@@ -11,6 +11,12 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -38,6 +43,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -73,50 +81,70 @@ fun CharacterDetailScreen(
         "Loading Character Details ..."
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                colors = getTopAppColors(),
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp()}) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-            )
-        }
-    ) { innerPadding ->
-
-        when (uiState) {
-            is CharacterDetailUiState.Loading -> {
-                LoadingScreen()
-            }
-
-            is CharacterDetailUiState.Success -> {
-                val character = (uiState as CharacterDetailUiState.Success).character
-                val location = (uiState as CharacterDetailUiState.Success).location
-
-                val context = LocalContext.current.findActivity()
-                LaunchedEffect(Unit) {
-                    (context as? AppCompatActivity)?.supportActionBar?.title = character.name
+    with(animatedContentScope) {
+        with(sharedTransitionScope) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text(title) },
+                        modifier = Modifier
+                            .renderInSharedTransitionScopeOverlay(
+                                zIndexInOverlay = 1f
+                            )
+                            .animateEnterExit(
+                                enter = fadeIn() + slideInVertically {
+                                    it
+                                },
+                                exit = fadeOut() + slideOutVertically {
+                                    it
+                                }
+                            ),
+                        colors = getTopAppColors().copy(
+                            containerColor = Color.Transparent
+                        ),
+                        navigationIcon = {
+                            IconButton(onClick = { navController.navigateUp() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        },
+                    )
                 }
+            ) { innerPadding ->
 
-                CharacterDetailContent(
-                    modifier = Modifier.padding(innerPadding),
-                    character = character,
-                    locationData = location,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedContentScope = animatedContentScope
-                )
-            }
+                when (uiState) {
+                    is CharacterDetailUiState.Loading -> {
+                        LoadingScreen()
+                    }
 
-            is CharacterDetailUiState.Error -> {
-                ShowErrorStateToast((uiState as CharacterDetailUiState.Error).message)
+                    is CharacterDetailUiState.Success -> {
+                        val character = (uiState as CharacterDetailUiState.Success).character
+                        val location = (uiState as CharacterDetailUiState.Success).location
+
+                        val context = LocalContext.current.findActivity()
+                        LaunchedEffect(Unit) {
+                            (context as? AppCompatActivity)?.supportActionBar?.title =
+                                character.name
+                        }
+
+                        CharacterDetailContent(
+                            modifier = Modifier.padding(innerPadding),
+                            character = character,
+                            locationData = location,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedContentScope = animatedContentScope
+                        )
+                    }
+
+                    is CharacterDetailUiState.Error -> {
+                        ShowErrorStateToast((uiState as CharacterDetailUiState.Error).message)
+                    }
+                }
             }
         }
     }
-
-
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -128,15 +156,31 @@ fun CharacterDetailContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope
 ) {
+    val colorStops = arrayOf(
+        0.01f to MaterialTheme.colorScheme.primary,
+        0.2F to MaterialTheme.colorScheme.secondaryContainer,
+        1f to MaterialTheme.colorScheme.background,
+    )
     with(sharedTransitionScope) {
-        Surface(
-            modifier = modifier
+        Box(
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            color = MaterialTheme.colorScheme.background
+                .background(
+                    Brush.verticalGradient(
+                        colorStops = colorStops,
+                        tileMode = TileMode.Decal
+                    )
+                )
+                .sharedBounds(
+                    sharedTransitionScope.rememberSharedContentState(key = "border-${character.id}"),
+                    animatedVisibilityScope = animatedContentScope,
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                )
         ) {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 GlideImage(
@@ -155,7 +199,7 @@ fun CharacterDetailContent(
                         )
                         .width(260.dp)
                         .height(260.dp)
-                        .padding(10.dp)
+                        .padding(5.dp)
                         //.align(Alignment.Center)
                         .clip(RoundedCornerShape(12.dp)),
                     loading = placeholder(R.drawable.avatar_placeholder)
