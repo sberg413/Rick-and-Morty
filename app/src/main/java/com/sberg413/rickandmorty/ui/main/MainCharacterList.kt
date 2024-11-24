@@ -11,6 +11,8 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +37,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -49,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -252,27 +254,36 @@ fun CharacterListItem(
 ) {
 
     with(sharedTransitionScope) {
-        val roundedCornerAnimation by animatedContentScope.transition.animateDp(label = "rounded corner") { enterExit ->
-            when (enterExit) {
-                EnterExitState.PreEnter -> 0.dp
-                EnterExitState.Visible -> 12.dp
-                EnterExitState.PostExit -> 12.dp
+        val roundedCornerAnimation by animatedContentScope.transition
+            .animateDp(label = "rounded corner") { enterExit ->
+                when (enterExit) {
+                    EnterExitState.PreEnter -> 12.dp
+                    EnterExitState.Visible -> 12.dp
+                    EnterExitState.PostExit -> 0.dp
+                }
             }
-        }
-        Surface(
+        Box(
             modifier = modifier
                 .fillMaxWidth()
                 .clickable { clickListener(character) }
                 .padding(horizontal = 8.dp, vertical = 4.dp)
+                .shadow(4.dp, MaterialTheme.shapes.medium) // Apply elevation
+                .clip(MaterialTheme.shapes.medium) // Apply shape for clipping
+                .border(0.5.dp, MaterialTheme.colorScheme.onSurface, MaterialTheme.shapes.medium)
+                .background(
+                    MaterialTheme.colorScheme.surfaceVariant,
+                    MaterialTheme.shapes.medium
+                ) // Apply background and shape
                 .sharedBounds(
                     sharedTransitionScope.rememberSharedContentState(key = "border-${character.id}"),
                     animatedVisibilityScope = animatedContentScope,
-                    // clipInOverlayDuringTransition = OverlayClip( RoundedCornerShape(roundedCornerAnimation) )
-                ),
-            shape = MaterialTheme.shapes.medium,
-            tonalElevation = 4.dp,
-            color = MaterialTheme.colorScheme.surface,
-            // border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground)
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    clipInOverlayDuringTransition = OverlayClip(
+                        RoundedCornerShape(
+                            roundedCornerAnimation
+                        )
+                    )
+                )
         ) {
             Row(modifier = Modifier.padding(12.dp)) {
                 GlideImage(
@@ -294,7 +305,9 @@ fun CharacterListItem(
                     loading = placeholder(R.drawable.avatar_placeholder)
                 )
 
-                Column(modifier = Modifier.padding(start = 22.dp).align(Alignment.CenterVertically)) {
+                Column(modifier = Modifier
+                    .padding(start = 22.dp)
+                    .align(Alignment.CenterVertically)) {
                     Text(
                         modifier = Modifier
                             .sharedBounds(
@@ -314,11 +327,11 @@ fun CharacterListItem(
                         Text(
                             text = character.status,
                             modifier = Modifier
+                                .padding(end = 10.dp)
                                 .sharedBounds(
                                     sharedTransitionScope.rememberSharedContentState(key = "status-${character.id}"),
                                     animatedVisibilityScope = animatedContentScope
-                                )
-                                .padding(end = 10.dp),
+                                ),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

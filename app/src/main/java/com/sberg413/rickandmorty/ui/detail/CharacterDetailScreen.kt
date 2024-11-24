@@ -7,9 +7,11 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -75,18 +77,12 @@ fun CharacterDetailScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    val title = if (uiState is CharacterDetailUiState.Success) {
-        (uiState as CharacterDetailUiState.Success).character.name
-    } else {
-        "Loading Character Details ..."
-    }
-
     with(animatedContentScope) {
         with(sharedTransitionScope) {
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text(title) },
+                        title = { Text( stringResource(R.string.character_details) ) },
                         modifier = Modifier
                             .renderInSharedTransitionScopeOverlay(
                                 zIndexInOverlay = 1f
@@ -103,7 +99,7 @@ fun CharacterDetailScreen(
                             containerColor = Color.Transparent
                         ),
                         navigationIcon = {
-                            IconButton(onClick = { navController.navigateUp() }) {
+                            IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back"
@@ -161,6 +157,14 @@ fun CharacterDetailContent(
         0.2F to MaterialTheme.colorScheme.secondaryContainer,
         1f to MaterialTheme.colorScheme.background,
     )
+    val roundedCornerAnimation by animatedContentScope.transition
+        .animateDp(label = "rounded corner") { enterExit ->
+            when (enterExit) {
+                EnterExitState.PreEnter -> 0.dp
+                EnterExitState.Visible -> 0.dp
+                EnterExitState.PostExit -> 12.dp
+            }
+        }
     with(sharedTransitionScope) {
         Box(
             modifier = Modifier
@@ -174,7 +178,12 @@ fun CharacterDetailContent(
                 .sharedBounds(
                     sharedTransitionScope.rememberSharedContentState(key = "border-${character.id}"),
                     animatedVisibilityScope = animatedContentScope,
-                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    clipInOverlayDuringTransition = OverlayClip(
+                        RoundedCornerShape(
+                            roundedCornerAnimation
+                        )
+                    )
                 )
         ) {
             Column(
@@ -208,13 +217,13 @@ fun CharacterDetailContent(
                 Text(
                     text = character.name,
                     modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 18.dp)
+                        .testTag("CharacterName")
                         .sharedBounds(
                             sharedTransitionScope.rememberSharedContentState(key = "name-${character.id}"),
                             animatedVisibilityScope = animatedContentScope
-                        )
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 18.dp)
-                        .testTag("CharacterName"),
+                        ),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -251,13 +260,13 @@ private fun CharacterDetailRow(modifier: Modifier =  Modifier, dataModifier: Mod
     Row(
         modifier = modifier
             .padding(horizontal = 10.dp, vertical = 15.dp)
-            .fillMaxWidth()) {
+            .fillMaxWidth()
+    ) {
         Text(
             text = stringResource(id = label),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
-                .weight(1f),
+            modifier = Modifier.fillMaxWidth(0.47f),
             textAlign =  TextAlign.End
         )
         Text(
@@ -273,7 +282,6 @@ private fun CharacterDetailRow(modifier: Modifier =  Modifier, dataModifier: Mod
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = dataModifier
-                .weight(1f)
                 .testTag(stringResource(label)),
             textAlign =  TextAlign.Start
         )
