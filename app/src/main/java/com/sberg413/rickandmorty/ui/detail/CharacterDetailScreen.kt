@@ -5,8 +5,6 @@ package com.sberg413.rickandmorty.ui.detail
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -54,6 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -62,6 +61,8 @@ import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.ui.LoadingScreen
+import com.sberg413.rickandmorty.ui.LocalNavAnimatedVisibilityScope
+import com.sberg413.rickandmorty.ui.LocalSharedTransitionScope
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import com.sberg413.rickandmorty.utils.findActivity
@@ -69,15 +70,17 @@ import com.sberg413.rickandmorty.utils.findActivity
 
 @Composable
 fun CharacterDetailScreen(
-    viewModel: DetailViewModel,
     navController: NavController,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    viewModel: DetailViewModel = hiltViewModel()
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
+    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
 
-    with(animatedContentScope) {
+    with(animatedVisibilityScope) {
         with(sharedTransitionScope) {
             Scaffold(
                 topBar = {
@@ -128,9 +131,7 @@ fun CharacterDetailScreen(
                         CharacterDetailContent(
                             modifier = Modifier.padding(innerPadding),
                             character = character,
-                            locationData = location,
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedContentScope = animatedContentScope
+                            locationData = location
                         )
                     }
 
@@ -148,16 +149,18 @@ fun CharacterDetailScreen(
 fun CharacterDetailContent(
     modifier: Modifier = Modifier,
     character: Character,
-    locationData: Location?,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    locationData: Location?
 ) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
+    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
     val colorStops = arrayOf(
         0.01f to MaterialTheme.colorScheme.primary,
         0.2F to MaterialTheme.colorScheme.secondaryContainer,
         1f to MaterialTheme.colorScheme.background,
     )
-    val roundedCornerAnimation by animatedContentScope.transition
+    val roundedCornerAnimation by animatedVisibilityScope.transition
         .animateDp(label = "rounded corner") { enterExit ->
             when (enterExit) {
                 EnterExitState.PreEnter -> 0.dp
@@ -177,7 +180,7 @@ fun CharacterDetailContent(
                 )
                 .sharedBounds(
                     sharedTransitionScope.rememberSharedContentState(key = "border-${character.id}"),
-                    animatedVisibilityScope = animatedContentScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
                     resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                     clipInOverlayDuringTransition = OverlayClip(
                         RoundedCornerShape(
@@ -198,7 +201,7 @@ fun CharacterDetailContent(
                     modifier = Modifier
                         .sharedElement(
                             sharedTransitionScope.rememberSharedContentState(key = "image-${character.id}"),
-                            animatedVisibilityScope = animatedContentScope,
+                            animatedVisibilityScope = animatedVisibilityScope,
                             boundsTransform = { _, _ ->
                                 spring(
                                     dampingRatio = 0.8f,
@@ -222,7 +225,7 @@ fun CharacterDetailContent(
                         .testTag("CharacterName")
                         .sharedBounds(
                             sharedTransitionScope.rememberSharedContentState(key = "name-${character.id}"),
-                            animatedVisibilityScope = animatedContentScope
+                            animatedVisibilityScope = animatedVisibilityScope
                         ),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground
@@ -233,14 +236,14 @@ fun CharacterDetailContent(
                 CharacterDetailRow(dataModifier = Modifier
                     .sharedBounds(
                         sharedTransitionScope.rememberSharedContentState(key = "status-${character.id}"),
-                        animatedVisibilityScope = animatedContentScope
+                        animatedVisibilityScope = animatedVisibilityScope
                     ),
                     label = R.string.status,
                     data = character.status)
                 CharacterDetailRow(dataModifier = Modifier
                     .sharedBounds(
                         sharedTransitionScope.rememberSharedContentState(key = "species-${character.id}"),
-                        animatedVisibilityScope = animatedContentScope
+                        animatedVisibilityScope = animatedVisibilityScope
                     ),
                     label = R.string.species,
                     data = character.species)
@@ -316,12 +319,9 @@ private fun CharacterDetailContentPreview() {
     )
     MaterialTheme {
         SharedTransitionLayout {
-            AnimatedContent(true, label = "test") { targetState ->
-                if (targetState) {
-                    CharacterDetailContent(character = character, locationData = location,
-                        sharedTransitionScope = this@SharedTransitionLayout, animatedContentScope = this@AnimatedContent)
-                }
-            }
+            CharacterDetailContent(
+                character = character, locationData = location
+            )
         }
     }
 }

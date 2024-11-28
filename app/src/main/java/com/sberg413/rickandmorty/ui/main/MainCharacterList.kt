@@ -3,11 +3,8 @@
 package com.sberg413.rickandmorty.ui.main
 
 import android.util.Log
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
@@ -57,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -67,6 +65,8 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
+import com.sberg413.rickandmorty.ui.LocalNavAnimatedVisibilityScope
+import com.sberg413.rickandmorty.ui.LocalSharedTransitionScope
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
 import kotlinx.coroutines.flow.filterNotNull
@@ -74,10 +74,8 @@ import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 fun MainCharacterListScreen(
-    viewModel: MainViewModel,
     navController: NavController,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    viewModel: MainViewModel = hiltViewModel()
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
@@ -137,9 +135,7 @@ fun MainCharacterListScreen(
             CharacterResultContent(
                 characters = characters,
                 onItemClicked = onItemClicked,
-                snackbarHostState = snackbarHostState,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = animatedContentScope
+                snackbarHostState = snackbarHostState
             )
         }
 
@@ -180,11 +176,8 @@ fun StatusDropdownMenu(
                         onSelection(option)
                     })
             }
-
         }
-
     }
-
 }
 
 @Composable
@@ -192,10 +185,9 @@ fun CharacterResultContent(
     modifier: Modifier = Modifier,
     characters: LazyPagingItems<Character>,
     onItemClicked: (Character) -> Unit,
-    snackbarHostState: SnackbarHostState,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    snackbarHostState: SnackbarHostState
 ) {
+
     when (val loadState = characters.loadState.refresh) {
         LoadState.Loading -> LoadingScreen(modifier = modifier)
         is LoadState.Error -> {
@@ -210,7 +202,7 @@ fun CharacterResultContent(
         }
         else -> {
             if (characters.itemCount > 0) {
-                CharacterGridResults(modifier, characters, onItemClicked, sharedTransitionScope, animatedContentScope)
+                CharacterGridResults(modifier, characters, onItemClicked)
             } else {
                 EmptyResultsView(modifier = modifier)
             }
@@ -222,9 +214,7 @@ fun CharacterResultContent(
 fun CharacterGridResults(
     modifier: Modifier = Modifier,
     characters: LazyPagingItems<Character>,
-    onItemClicked: (Character) -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    onItemClicked: (Character) -> Unit
 ) {
     LazyVerticalGrid(
         modifier = modifier.testTag("CharacterList"),
@@ -234,9 +224,7 @@ fun CharacterGridResults(
             characters[index]?.let { item ->
                 CharacterListItem(
                     character = item,
-                    clickListener = onItemClicked,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedContentScope = animatedContentScope
+                    clickListener = onItemClicked
                 )
             }
         }
@@ -248,13 +236,16 @@ fun CharacterGridResults(
 fun CharacterListItem(
     character: Character,
     modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
     clickListener: (Character) -> Unit,
 ) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
+    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
+
 
     with(sharedTransitionScope) {
-        val roundedCornerAnimation by animatedContentScope.transition
+        val roundedCornerAnimation by animatedVisibilityScope.transition
             .animateDp(label = "rounded corner") { enterExit ->
                 when (enterExit) {
                     EnterExitState.PreEnter -> 12.dp
@@ -276,7 +267,7 @@ fun CharacterListItem(
                 ) // Apply background and shape
                 .sharedBounds(
                     sharedTransitionScope.rememberSharedContentState(key = "border-${character.id}"),
-                    animatedVisibilityScope = animatedContentScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
                     resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                     clipInOverlayDuringTransition = OverlayClip(
                         RoundedCornerShape(
@@ -292,7 +283,7 @@ fun CharacterListItem(
                     modifier = Modifier
                         .sharedElement(
                             sharedTransitionScope.rememberSharedContentState(key = "image-${character.id}"),
-                            animatedVisibilityScope = animatedContentScope,
+                            animatedVisibilityScope = animatedVisibilityScope,
                             boundsTransform = { _, _ ->
                                 spring(
                                     dampingRatio = 0.8f,
@@ -312,7 +303,7 @@ fun CharacterListItem(
                         modifier = Modifier
                             .sharedBounds(
                                 sharedTransitionScope.rememberSharedContentState(key = "name-${character.id}"),
-                                animatedVisibilityScope = animatedContentScope
+                                animatedVisibilityScope = animatedVisibilityScope
                             ),
                         text = character.name,
                         style = MaterialTheme.typography.titleMedium,
@@ -330,7 +321,7 @@ fun CharacterListItem(
                                 .padding(end = 10.dp)
                                 .sharedBounds(
                                     sharedTransitionScope.rememberSharedContentState(key = "status-${character.id}"),
-                                    animatedVisibilityScope = animatedContentScope
+                                    animatedVisibilityScope = animatedVisibilityScope
                                 ),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -341,7 +332,7 @@ fun CharacterListItem(
                             modifier = Modifier
                                 .sharedBounds(
                                     sharedTransitionScope.rememberSharedContentState(key = "species-${character.id}"),
-                                    animatedVisibilityScope = animatedContentScope
+                                    animatedVisibilityScope = animatedVisibilityScope
                                 ),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -369,18 +360,10 @@ fun CharacterListItemPreview() {
         "Beth Smith"
     )
     MaterialTheme {
-        SharedTransitionLayout {
-            AnimatedContent(true, label = "test") { targetState ->
-                if (targetState) {
-                    CharacterListItem(
-                        character = beth,
-                        Modifier,
-                        this@SharedTransitionLayout,
-                        this@AnimatedContent
-                    ) {}
-                }
-            }
-        }
+        CharacterListItem(
+            character = beth,
+            Modifier
+        ) {}
     }
 }
 
