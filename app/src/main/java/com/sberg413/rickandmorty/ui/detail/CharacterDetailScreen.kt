@@ -2,6 +2,7 @@
 
 package com.sberg413.rickandmorty.ui.detail
 
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
@@ -65,6 +66,7 @@ import com.sberg413.rickandmorty.ui.LocalNavAnimatedVisibilityScope
 import com.sberg413.rickandmorty.ui.LocalSharedTransitionScope
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
+import com.sberg413.rickandmorty.utils.RMPreviewWrapper
 import com.sberg413.rickandmorty.utils.findActivity
 
 
@@ -293,7 +295,9 @@ private fun CharacterDetailRow(modifier: Modifier =  Modifier, dataModifier: Mod
 }
 
 @ExcludeFromJacocoGeneratedReport
-@Preview
+@Preview("default")
+@Preview("dark theme", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview("large font", fontScale = 2f)
 @Composable
 private fun CharacterDetailContentPreview() {
     val character = Character(
@@ -317,33 +321,12 @@ private fun CharacterDetailContentPreview() {
         created = "01/01/2023"
 
     )
-    MaterialTheme {
-        SharedTransitionLayout {
-            CharacterDetailContent(
-                character = character, locationData = location
-            )
-        }
+    RMPreviewWrapper {
+        CharacterDetailContent(
+            character = character, locationData = location
+        )
     }
 }
-
-//@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-//@OptIn(ExperimentalGlideComposeApi::class)
-//@Composable
-//fun CharacterImage(url: String, name: String) {
-//    Box(Modifier.fillMaxWidth()) {
-//        GlideImage(
-//            model = url,
-//            contentDescription = stringResource(R.string.character_img_content_description, name),
-//            modifier = Modifier
-//                .width(200.dp)
-//                .height(200.dp)
-//                .padding(10.dp)
-//                .align(Alignment.Center)
-//                .clip(RoundedCornerShape(12.dp)),
-//            loading = placeholder(R.drawable.avatar_placeholder)
-//        )
-//    }
-//}
 
 @Composable
 fun ShowErrorStateToast(errMsg: String) {

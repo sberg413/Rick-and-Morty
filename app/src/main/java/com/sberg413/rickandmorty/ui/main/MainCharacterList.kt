@@ -69,6 +69,7 @@ import com.sberg413.rickandmorty.ui.LocalNavAnimatedVisibilityScope
 import com.sberg413.rickandmorty.ui.LocalSharedTransitionScope
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
+import com.sberg413.rickandmorty.utils.RMPreviewWrapper
 import kotlinx.coroutines.flow.filterNotNull
 
 
@@ -359,7 +360,7 @@ fun CharacterListItemPreview() {
         "https://rickandmortyapi.com/api/character/avatar/4.jpeg",
         "Beth Smith"
     )
-    MaterialTheme {
+    RMPreviewWrapper {
         CharacterListItem(
             character = beth,
             Modifier
