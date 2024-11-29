@@ -1,9 +1,6 @@
 package com.sberg413.rickandmorty.ui.main
 
 import androidx.activity.ComponentActivity
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -16,6 +13,7 @@ import androidx.paging.PagingData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sberg413.rickandmorty.TestData
 import com.sberg413.rickandmorty.data.model.Character
+import com.sberg413.rickandmorty.utils.RMPreviewWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -29,7 +27,6 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.whenever
 
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @RunWith(AndroidJUnit4::class)
 class MainRobolectricTest {
 
@@ -151,20 +148,13 @@ class MainRobolectricTest {
 
     private fun initializeMainListScreenContent() {
         composeTestRule.setContent {
-            SharedTransitionLayout {
-                AnimatedContent(true, label = "test") { targetState ->
-                    if (targetState) {
-                        MainCharacterListScreen(
-                            viewModel = viewModel,
-                            navController = navController,
-                            sharedTransitionScope = this@SharedTransitionLayout,
-                            animatedContentScope = this
-                        )
-                    }
-                }
-            }
+           RMPreviewWrapper {
+               MainCharacterListScreen(
+                   navController = navController,
+                   viewModel = viewModel
+               )
+           }
         }
-
     }
 
 }

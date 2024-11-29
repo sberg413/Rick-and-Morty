@@ -1,15 +1,12 @@
 package com.sberg413.rickandmorty.ui.detail
 
 import androidx.activity.ComponentActivity
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.ui.theme.AppTheme
+import com.sberg413.rickandmorty.utils.RMPreviewWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -23,7 +20,6 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.whenever
 import org.robolectric.shadows.ShadowToast
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @RunWith(AndroidJUnit4::class)
 class DetailRobolectricTest {
 
@@ -100,17 +96,11 @@ class DetailRobolectricTest {
 
     private fun initializeDetailScreenContent() {
         composeTestRule.setContent {
-            SharedTransitionLayout {
-                AnimatedContent(true, label = "test") { targetState ->
-                    if (targetState) {
-                        CharacterDetailScreen(
-                            viewModel = viewModel,
-                            navController = navController,
-                            sharedTransitionScope = this@SharedTransitionLayout,
-                            animatedContentScope = this
-                        )
-                    }
-                }
+            RMPreviewWrapper {
+                CharacterDetailScreen(
+                    navController = navController,
+                    viewModel = viewModel
+                )
             }
         }
     }
