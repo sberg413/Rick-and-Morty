@@ -8,7 +8,6 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
@@ -75,8 +74,14 @@ fun CharacterDetailScreen(
     navController: NavController,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
+    CharacterDetail(uiState) {
+        navController.popBackStack()
+    }
+}
+
+@Composable
+fun CharacterDetail(uiState: CharacterDetailUiState, backAction: () -> Unit) {
     val sharedTransitionScope = LocalSharedTransitionScope.current
         ?: throw IllegalStateException("No SharedElementScope found")
     val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
@@ -104,7 +109,7 @@ fun CharacterDetailScreen(
                             containerColor = Color.Transparent
                         ),
                         navigationIcon = {
-                            IconButton(onClick = { navController.popBackStack() }) {
+                            IconButton(onClick = backAction) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back"
@@ -121,8 +126,8 @@ fun CharacterDetailScreen(
                     }
 
                     is CharacterDetailUiState.Success -> {
-                        val character = (uiState as CharacterDetailUiState.Success).character
-                        val location = (uiState as CharacterDetailUiState.Success).location
+                        val character = uiState.character
+                        val location = uiState.location
 
                         val context = LocalContext.current.findActivity()
                         LaunchedEffect(Unit) {
@@ -138,7 +143,7 @@ fun CharacterDetailScreen(
                     }
 
                     is CharacterDetailUiState.Error -> {
-                        ShowErrorStateToast((uiState as CharacterDetailUiState.Error).message)
+                        ShowErrorStateToast(uiState.message)
                     }
                 }
             }
@@ -321,10 +326,9 @@ private fun CharacterDetailContentPreview() {
         created = "01/01/2023"
 
     )
+    val uiState = CharacterDetailUiState.Success(character, location)
     RMPreviewWrapper {
-        CharacterDetailContent(
-            character = character, locationData = location
-        )
+            CharacterDetail(uiState){ /* do nothing */ }
     }
 }
 
