@@ -13,6 +13,7 @@ tasks.register('jacocoTestReport', JacocoReport) {
     dependsOn 'testDebugUnitTest' // , 'createDebugCoverageReport'
 
 
+    // Excluded files from coverage
     def fileFilter = [
             '**/R.class',
             '**/R$*.class',
@@ -28,16 +29,10 @@ tasks.register('jacocoTestReport', JacocoReport) {
             'android/**/*.*'
     ]
 
-    def kotlinTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug",
-        excludes: fileFilter // + ['**/*Activity.class', '**/*Fragment.class', '**/*Application.class']
-    )
-    def javacTree = fileTree(dir: "$buildDir/intermediates/javac/debug",
-        excludes: fileFilter
-    )
-//    def hiltTree = fileTree("$buildDir/intermediates/classes/debug/transformDebugClassesWithAsm/dirs/") {
-//        include '**/Hilt_*.class'
-//    }
+    def kotlinTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+    def javacTree = fileTree(dir: "$buildDir/intermediates/javac/debug", excludes: fileFilter)
 
+    // Ensuring source directories are correctly set
     def mainSrc = fileTree("${project.projectDir}/src/main/java") {
         exclude '**/di/*.kt'
     }
@@ -48,14 +43,15 @@ tasks.register('jacocoTestReport', JacocoReport) {
                 exclude '**/*$Preview*' // Excludes Jetpack Compose @Preview methods
             }
     )
-    executionData.setFrom(fileTree(dir: layout.buildDirectory.get().asFile, includes: [
+    executionData.setFrom(fileTree(dir:  buildDir, includes: [
             'build/jacoco/testDebugUnitTest.exec',
             'build/outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec'
-        ]))
+        ]).files.findAll{it.exists() }
+    )
 
     reports {
-        xml.required = true
-        html.required = true
-        csv.required = false
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
     }
 }
