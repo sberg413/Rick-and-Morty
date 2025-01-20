@@ -99,7 +99,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.androidx.navigation.compose)
     ksp(libs.glide.ksp)
-    annotationProcessor(libs.glide.compiler)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
@@ -131,7 +130,6 @@ dependencies {
 
     /**** Room Start ****/
     implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
@@ -150,7 +148,6 @@ dependencies {
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.mockito.core)
-    // androidTestImplementation(libs.mockito.inline)
     androidTestImplementation(libs.mockito.android)
     kaptAndroidTest(libs.hilt.compiler)
 
