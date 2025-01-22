@@ -43,16 +43,15 @@ tasks.register('jacocoTestReport', JacocoReport) {
     }
 
     sourceDirectories.setFrom(mainSrc)
-    classDirectories.setFrom(kotlinTree, javacTree) // , hiltTree)
-    executionData.setFrom(fileTree(dir: project.projectDir, includes: [
+    classDirectories.setFrom(
+            files(kotlinTree, javacTree).asFileTree.matching {
+                exclude '**/*$Preview*' // Excludes Jetpack Compose @Preview methods
+            }
+    )
+    executionData.setFrom(fileTree(dir: layout.buildDirectory.get().asFile, includes: [
             'build/jacoco/testDebugUnitTest.exec',
             'build/outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec'
         ]))
-
-    // Exclude methods named "Preview*" from the Jacoco report
-    classDirectories = classDirectories.asFileTree.matching {
-        exclude '**/*$Preview*' // Excludes methods containing "Preview"
-    }
 
     reports {
         xml.required = true
