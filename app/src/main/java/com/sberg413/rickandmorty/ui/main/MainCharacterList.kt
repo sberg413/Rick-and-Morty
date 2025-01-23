@@ -10,6 +10,8 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import android.widget.Toast
+import androidx.activity.compose.ReportDrawn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -250,6 +252,7 @@ fun CharacterGridResults(
             }
         }
     }
+    ReportDrawn()
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -296,6 +299,7 @@ fun CharacterListItem(
                         )
                     )
                 )
+                .testTag("character_item"),
         ) {
             Row(modifier = Modifier.padding(12.dp)) {
                 GlideImage(
@@ -399,7 +403,7 @@ fun CharacterListItemPreview() {
 @Composable
 fun MainCharacterListContentPreview() {
     val uiState = MainUiState()
-         
+
     val characters = flowOf(
         PagingData.from(
             PreviewData.characterList,

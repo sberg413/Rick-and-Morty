@@ -11,6 +11,10 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,7 +25,7 @@ import com.sberg413.rickandmorty.ui.main.MainCharacterListScreen
 import com.sberg413.rickandmorty.ui.theme.AppTheme
 
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun RickMortyApp() {
     AppTheme {
@@ -31,6 +35,10 @@ fun RickMortyApp() {
                 LocalSharedTransitionScope provides this
             ) {
                 NavHost(
+                    modifier = Modifier.semantics {
+                        // Allows to use testTag() for UiAutomator resource-id.
+                        testTagsAsResourceId = true
+                    },
                     navController = navController,
                     startDestination = "main_list"
                 ) {
