@@ -13,6 +13,7 @@ import androidx.paging.PagingData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sberg413.rickandmorty.TestData
 import com.sberg413.rickandmorty.data.model.Character
+import com.sberg413.rickandmorty.utils.RMPreviewWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -74,9 +75,7 @@ class MainRobolectricTest {
         whenever(viewModel.listData).thenReturn( pagingData )
 
         // Set up the composable
-        composeTestRule.setContent {
-            MainCharacterListScreen(viewModel, navController)
-        }
+        initializeMainListScreenContent()
 
         composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
         composeTestRule.onNodeWithTag("CharacterSearchInput").assertExists()
@@ -107,11 +106,8 @@ class MainRobolectricTest {
 
         whenever(viewModel.listData).thenReturn( pagingData )
 
-
         // Set up the composable
-        composeTestRule.setContent {
-            MainCharacterListScreen(viewModel, navController)
-        }
+        initializeMainListScreenContent()
 
         // Verify that the Snackbar is shown with the correct message
         composeTestRule.onNodeWithText("ERROR: Test error").assertIsDisplayed()
@@ -142,14 +138,23 @@ class MainRobolectricTest {
         whenever(viewModel.listData).thenReturn( pagingData )
 
         // Set up the composable
-        composeTestRule.setContent {
-            MainCharacterListScreen(viewModel, navController)
-        }
+        initializeMainListScreenContent()
 
         // Verify that the Snackbar is shown with the correct message
         composeTestRule.onNodeWithTag("LoadingScreen").assertDoesNotExist()
         composeTestRule.onNodeWithTag("EmptyResultsView").assertDoesNotExist()
         composeTestRule.onNodeWithTag("CharacterList").assertIsDisplayed()
+    }
+
+    private fun initializeMainListScreenContent() {
+        composeTestRule.setContent {
+           RMPreviewWrapper {
+               MainCharacterListScreen(
+                   navController = navController,
+                   viewModel = viewModel
+               )
+           }
+        }
     }
 
 }

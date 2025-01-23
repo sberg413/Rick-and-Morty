@@ -6,7 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sberg413.rickandmorty.TestData
-import com.sberg413.rickandmorty.ui.theme.AppTheme
+import com.sberg413.rickandmorty.utils.RMPreviewWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -50,9 +50,7 @@ class DetailRobolectricTest {
             )
         )
 
-        composeTestRule.setContent {
-            CharacterDetailScreen(viewModel = viewModel, navController = navController)
-        }
+        initializeDetailScreenContent()
 
         composeTestRule.onNodeWithTag("CharacterName").assertExists()
         composeTestRule.onNodeWithTag("Species").assertExists()
@@ -64,11 +62,7 @@ class DetailRobolectricTest {
     fun testLoadingState() {
         whenever(viewModel.uiState).thenReturn( MutableStateFlow(CharacterDetailUiState.Loading))
 
-        composeTestRule.setContent {
-            AppTheme {
-                CharacterDetailScreen(viewModel = viewModel, navController = navController)
-            }
-        }
+        initializeDetailScreenContent()
 
         // Verify LoadingScreen is displayed
         composeTestRule.onNodeWithTag("LoadingScreen").assertExists()
@@ -79,11 +73,7 @@ class DetailRobolectricTest {
         val errorMessage = "Test Error"
         whenever(viewModel.uiState).thenReturn(MutableStateFlow(CharacterDetailUiState.Error(errorMessage)))
 
-        composeTestRule.setContent {
-            AppTheme {
-                CharacterDetailScreen(viewModel = viewModel, navController = navController)
-            }
-        }
+        initializeDetailScreenContent()
 
         // Assert that error toast is displayed
         val latestToast = ShadowToast.getTextOfLatestToast()
@@ -95,16 +85,23 @@ class DetailRobolectricTest {
     fun testActionBarTitle() {
         whenever(viewModel.uiState).thenReturn( MutableStateFlow(CharacterDetailUiState.Success(TestData.TEST_CHARACTER, TestData.TEST_LOCATION)))
 
-        composeTestRule.setContent {
-            AppTheme {
-                CharacterDetailScreen(viewModel = viewModel, navController = navController)
-            }
-        }
+        initializeDetailScreenContent()
 
         // Wait for LaunchedEffect to execute
         composeTestRule.waitForIdle()
 
         val activity = composeTestRule.activity
         assertEquals(TestData.TEST_CHARACTER.name, activity.title)
+    }
+
+    private fun initializeDetailScreenContent() {
+        composeTestRule.setContent {
+            RMPreviewWrapper {
+                CharacterDetailScreen(
+                    navController = navController,
+                    viewModel = viewModel
+                )
+            }
+        }
     }
 }

@@ -1,9 +1,21 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+
 package com.sberg413.rickandmorty.ui.detail
 
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -21,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -30,12 +42,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -44,130 +61,222 @@ import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.data.model.Location
 import com.sberg413.rickandmorty.ui.LoadingScreen
+import com.sberg413.rickandmorty.ui.LocalNavAnimatedVisibilityScope
+import com.sberg413.rickandmorty.ui.LocalSharedTransitionScope
 import com.sberg413.rickandmorty.ui.theme.getTopAppColors
 import com.sberg413.rickandmorty.utils.ExcludeFromJacocoGeneratedReport
+import com.sberg413.rickandmorty.utils.RMPreviewWrapper
 import com.sberg413.rickandmorty.utils.findActivity
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterDetailScreen(
-    viewModel: DetailViewModel,
-    navController: NavController
+    navController: NavController,
+    viewModel: DetailViewModel = hiltViewModel()
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
-
-    val title = if (uiState is CharacterDetailUiState.Success) {
-        (uiState as CharacterDetailUiState.Success).character.name
-    } else {
-        "Loading Character Details ..."
+    CharacterDetail(uiState) {
+        navController.popBackStack()
     }
+}
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                colors = getTopAppColors(),
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp()}) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+@Composable
+fun CharacterDetail(uiState: CharacterDetailUiState, backAction: () -> Unit) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
+    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
+
+    with(animatedVisibilityScope) {
+        with(sharedTransitionScope) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text( stringResource(R.string.character_details) ) },
+                        modifier = Modifier
+                            .renderInSharedTransitionScopeOverlay(
+                                zIndexInOverlay = 1f
+                            )
+                            .animateEnterExit(
+                                enter = fadeIn() + slideInVertically {
+                                    it
+                                },
+                                exit = fadeOut() + slideOutVertically {
+                                    it
+                                }
+                            ),
+                        colors = getTopAppColors().copy(
+                            containerColor = Color.Transparent
+                        ),
+                        navigationIcon = {
+                            IconButton(onClick = backAction) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        },
+                    )
+                }
+            ) { innerPadding ->
+
+                when (uiState) {
+                    is CharacterDetailUiState.Loading -> {
+                        LoadingScreen()
                     }
-                },
-            )
-        }
-    ) { innerPadding ->
 
-        CharacterDetailContent(
-            modifier = Modifier.padding(innerPadding),
-            uiState = uiState
-        )
-    }
+                    is CharacterDetailUiState.Success -> {
+                        val character = uiState.character
+                        val location = uiState.location
 
+                        val context = LocalContext.current.findActivity()
+                        LaunchedEffect(Unit) {
+                            (context as? AppCompatActivity)?.supportActionBar?.title =
+                                character.name
+                        }
 
-}
+                        CharacterDetailContent(
+                            modifier = Modifier.padding(innerPadding),
+                            character = character,
+                            locationData = location
+                        )
+                    }
 
-@Composable
-fun CharacterDetailContent(modifier: Modifier = Modifier, uiState: CharacterDetailUiState) {
-
-    when (uiState) {
-        is CharacterDetailUiState.Loading -> {
-            LoadingScreen()
-        }
-
-        is CharacterDetailUiState.Success -> {
-            val character = uiState.character
-            val location = uiState.location
-
-            val context = LocalContext.current.findActivity()
-            LaunchedEffect(Unit) {
-                (context as? AppCompatActivity)?.supportActionBar?.title = character.name
+                    is CharacterDetailUiState.Error -> {
+                        ShowErrorStateToast(uiState.message)
+                    }
+                }
             }
-
-            CharacterDetailContent(
-                modifier = modifier,
-                characterData = character,
-                locationData = location
-            )
-        }
-
-        is CharacterDetailUiState.Error -> {
-            ShowErrorStateToast(uiState.message)
         }
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun CharacterDetailContent(modifier: Modifier = Modifier, characterData: Character, locationData: Location?) {
-    Surface(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+fun CharacterDetailContent(
+    modifier: Modifier = Modifier,
+    character: Character,
+    locationData: Location?
+) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
+    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+        ?: throw IllegalStateException("No SharedElementScope found")
+    val colorStops = arrayOf(
+        0.01f to MaterialTheme.colorScheme.primary,
+        0.2F to MaterialTheme.colorScheme.secondaryContainer,
+        1f to MaterialTheme.colorScheme.background,
+    )
+    val roundedCornerAnimation by animatedVisibilityScope.transition
+        .animateDp(label = "rounded corner") { enterExit ->
+            when (enterExit) {
+                EnterExitState.PreEnter -> 0.dp
+                EnterExitState.Visible -> 0.dp
+                EnterExitState.PostExit -> 12.dp
+            }
+        }
+    with(sharedTransitionScope) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colorStops = colorStops,
+                        tileMode = TileMode.Decal
+                    )
+                )
+                .sharedBounds(
+                    sharedTransitionScope.rememberSharedContentState(key = "border-${character.id}"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    clipInOverlayDuringTransition = OverlayClip(
+                        RoundedCornerShape(
+                            roundedCornerAnimation
+                        )
+                    )
+                )
         ) {
-            CharacterImage(url = characterData.image, name = characterData.name)
+            Column(
+                modifier = modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                GlideImage(
+                    model = character.image,
+                    contentDescription = stringResource(R.string.character_img_content_description, character.name),
+                    modifier = Modifier
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "image-${character.id}"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            boundsTransform = { _, _ ->
+                                spring(
+                                    dampingRatio = 0.8f,
+                                    stiffness = 385f
+                                )
+                            }
+                        )
+                        .width(260.dp)
+                        .height(260.dp)
+                        .padding(5.dp)
+                        //.align(Alignment.Center)
+                        .clip(RoundedCornerShape(12.dp)),
+                    loading = placeholder(R.drawable.avatar_placeholder)
+                )
 
-            Text(
-                text = characterData.name,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 18.dp)
-                    .testTag("CharacterName")
-            )
+                Text(
+                    text = character.name,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 18.dp)
+                        .testTag("CharacterName")
+                        .sharedBounds(
+                            sharedTransitionScope.rememberSharedContentState(key = "name-${character.id}"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        ),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
 
 
+                // CharacterDetailRow(label = "Type", data = characterData.type)
+                CharacterDetailRow(dataModifier = Modifier
+                    .sharedBounds(
+                        sharedTransitionScope.rememberSharedContentState(key = "status-${character.id}"),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
+                    label = R.string.status,
+                    data = character.status)
+                CharacterDetailRow(dataModifier = Modifier
+                    .sharedBounds(
+                        sharedTransitionScope.rememberSharedContentState(key = "species-${character.id}"),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
+                    label = R.string.species,
+                    data = character.species)
+                locationData?.let { location ->
+                    CharacterDetailRow(label = R.string.location, data = location.name)
+                    CharacterDetailRow(label = R.string.dimension, data = location.dimension)
+                }
+                // CharacterDetailRow(label = "Number of residents", data = locationData.residentCount.toString())
 
-            // CharacterDetailRow(label = "Type", data = characterData.type)
-            CharacterDetailRow(label = R.string.status, data = characterData.status)
-            CharacterDetailRow(label = R.string.species, data = characterData.species)
-            locationData?.let { location ->
-                CharacterDetailRow(label = R.string.location, data = location.name)
-                CharacterDetailRow(label = R.string.dimension, data = location.dimension)
             }
-            // CharacterDetailRow(label = "Number of residents", data = locationData.residentCount.toString())
-
         }
     }
 }
 
 @Composable
-private fun CharacterDetailRow(modifier: Modifier =  Modifier, @StringRes label: Int, data: String) {
+private fun CharacterDetailRow(modifier: Modifier =  Modifier, dataModifier: Modifier = Modifier, @StringRes label: Int, data: String ) {
     Row(
         modifier = modifier
             .padding(horizontal = 10.dp, vertical = 15.dp)
-            .fillMaxWidth()) {
+            .fillMaxWidth()
+    ) {
         Text(
             text = stringResource(id = label),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
-                .weight(1f),
+            modifier = Modifier.fillMaxWidth(0.47f),
             textAlign =  TextAlign.End
         )
         Text(
@@ -182,8 +291,7 @@ private fun CharacterDetailRow(modifier: Modifier =  Modifier, @StringRes label:
             text = data,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
-                .weight(1f)
+            modifier = dataModifier
                 .testTag(stringResource(label)),
             textAlign =  TextAlign.Start
         )
@@ -192,7 +300,9 @@ private fun CharacterDetailRow(modifier: Modifier =  Modifier, @StringRes label:
 }
 
 @ExcludeFromJacocoGeneratedReport
-@Preview
+@Preview("default")
+@Preview("dark theme", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview("large font", fontScale = 2f)
 @Composable
 private fun CharacterDetailContentPreview() {
     val character = Character(
@@ -216,26 +326,9 @@ private fun CharacterDetailContentPreview() {
         created = "01/01/2023"
 
     )
-    MaterialTheme {
-        CharacterDetailContent(characterData = character, locationData = location)
-    }
-}
-
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun CharacterImage(url: String, name: String) {
-    Box(Modifier.fillMaxWidth()) {
-        GlideImage(
-            model = url,
-            contentDescription = stringResource(R.string.character_img_content_description, name),
-            modifier = Modifier
-                .width(200.dp)
-                .height(200.dp)
-                .padding(10.dp)
-                .align(Alignment.Center),
-            loading = placeholder(R.drawable.avatar_placeholder)
-        )
+    val uiState = CharacterDetailUiState.Success(character, location)
+    RMPreviewWrapper {
+            CharacterDetail(uiState){ /* do nothing */ }
     }
 }
 
