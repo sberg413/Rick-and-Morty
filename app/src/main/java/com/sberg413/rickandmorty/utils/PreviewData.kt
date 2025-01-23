@@ -1,11 +1,9 @@
-package com.sberg413.rickandmorty
+package com.sberg413.rickandmorty.utils
 
 import com.sberg413.rickandmorty.data.model.Character
 
 
 object PreviewData {
-
-
 
     val rick = Character(
         id = 1,

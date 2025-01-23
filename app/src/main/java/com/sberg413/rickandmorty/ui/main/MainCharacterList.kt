@@ -64,7 +64,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
-import com.sberg413.rickandmorty.PreviewData
+import com.sberg413.rickandmorty.utils.PreviewData
 import com.sberg413.rickandmorty.R
 import com.sberg413.rickandmorty.data.model.Character
 import com.sberg413.rickandmorty.ui.LoadingScreen
@@ -401,7 +401,8 @@ fun MainCharacterListContentPreview() {
     val uiState = MainUiState()
          
     val characters = flowOf(
-        PagingData.from(PreviewData.characterList,
+        PagingData.from(
+            PreviewData.characterList,
             LoadStates(
                 refresh = LoadState.NotLoading(endOfPaginationReached = true),
                 prepend = LoadState.NotLoading(endOfPaginationReached = true),
